@@ -1,0 +1,671 @@
+<!DOCTYPE html>      
+<html lang="en">        
+<head>        
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
+  <title>Notification</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />    
+ <script src="settings.js"></script>
+</head>        
+<body>      
+<div id="notificationPage" class="zoom">        
+  <div class="topPad">        
+   <div class="lap">     
+   <i id="backBtn" class="fa fa-arrow-left"></i>        
+    <h4>Notification</h4>    
+  <i id="menuDots" class="fas fa-ellipsis-v"></i>    
+  </div>  <!-- MENU (hidden by default) -->  <div id="actionMenu" class="action-menu">    
+  <button id="selectModeBtn">Select</button>    
+  <button id="deleteBtn">Delete</button>    
+  <button id="markUnreadBtn">Mark as Unread</button>    
+</div>  <!-- TRASH ICON (hidden by default) -->  <div id="trashBar" class="trash-bar">    
+  <i id="trashSelected" class="fas fa-trash"></i>    
+</div>    
+</div>        
+  <div class="tabHeader">        
+    <div class="tab active">Activities</div>        
+    <div class="tab">System</div>        
+    <div class="tab">Updates</div>        
+    <div class="underline"></div>        
+  </div>      
+  <div class="tab-pane active" id="transactionsPane">
+<p class="twt">
+      Your Activities appears here.
+</p>
+  </div>        
+<div class="tab-pane" id="importantPane"><p class="twt">
+  Your System notifications appears here.
+</p></div>        
+<div class="tab-pane" id="chatsPane">
+<p  class="twt">Updates and Announcements are shown here.</p>
+</div>
+
+<div id="notificationModal" class="modal">
+  <p id="modalText">Are you sure you want to delete selected notifications?</p>
+  <div class="modal-actions">
+    <button id="deleteSelectedBtn">Delete</button>
+    <button id="cancelBtn">Cancel</button>
+  </div>
+</div>
+<div id="modalOverlay" class="modal-overlay"></div>
+<style>        
+  body {        
+  margin: 0;        
+  font-family: sans-serif;        
+  background-color: #0d1117;        
+  color: ;        
+  height: 120vh;        
+}    .zoom {    
+animation: zoomIn 0.4s ease;    
+}  @keyframes zoomIn {  
+0% { transform: scale(0.9); opacity: 0; }  
+100% { transform: scale(1); opacity: 1; }  
+}  
+  
+.lap {  
+display: flex;  
+align-items: center;  
+gap: 10px;  
+padding: 10px;  
+background: #161b22;  
+color: var(--header-color,#00ffcc);  
+height: 40px;  
+margin-top: px;  
+align-content: center;  
+}  
+#selectAllContainer{
+  background: rgba(0,0,0,0.85) !important;
+}
+.twt {
+  margin-left: 5px;
+}
+.light-mode #selectAllContainer {
+  background: lightgray !important;
+input[type="checkbox"] {
+accent-color:#00ffcc;
+}
+
+}
+.lap i {  
+align-items: center;  
+margin-top: -20px;  
+margin-right: 5px;  
+margin: left -8px;  
+  
+}  
+.lap h4 {  
+align-self: center;  
+margin-top: 3px;  
+letter-spacing: 0.2px;  
+}  
+.fa-ellipsis-v {  
+position: relative;  
+left: 170px;  
+margin-top: 8px;  
+}  
+#menuDots {  
+cursor: pointer;  
+font-size: 18px;  
+}  
+  
+.action-menu {  
+position: fixed;  
+top: 25px;  
+right: 24px;  
+background: #222;  
+border-radius: 6px;  
+box-shadow: 0 4px 6px rgba(0,0,0,0.3);  
+display: none;  
+flex-direction: column;  
+z-index: 10;  
+} 
+.light-mode .fa-check {
+  color: #00d998;
+}
+.fa-check {
+  color: var(--header-color,#00ffcc);
+}
+#modalText{
+  font-weight: bold;
+ color: #f0f0f0;
+}
+.light-mode #modalText {
+  color: black;
+}
+/* Overlay */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+}
+.light-mode .modal {
+    background: #f0f0f0;
+}
+/* Modal box */
+.modal {
+  display: none;
+  position: fixed;
+  top:50%; left:50%;
+  transform: translate(-50%, -50%);
+  background: #161b22;
+  color: #00ffcc;
+  padding: 20px 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  z-index: 1000;
+  min-width: 250px;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+.notification[data-read="false"] strong {
+  font-weight: bold;
+  color: red;
+}
+.notification[data-read="true"] strong {
+  font-weight: normal;
+  color: green;
+}
+
+/* Buttons container */
+.modal-actions {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* Modal buttons */
+.modal-actions button {
+  padding: 6px 15px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+#deleteSelectedBtn {
+  background-color: #f55;
+  color: white;
+}
+
+#deleteSelectedBtn:hover {
+  background-color: #ff3333;
+}
+
+#cancelBtn {
+  background-color: #222;
+  color: #00ffcc;
+}
+
+#cancelBtn:hover {
+  background-color: #333;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {opacity:0; transform: translate(-50%, -48%) scale(0.95);}
+  to {opacity:1; transform: translate(-50%, -50%) scale(1);}
+}
+.action-menu button {  
+background: none;  
+border: none;  
+padding: 8px 12px;  
+color: #fff;  
+text-align: left;  
+cursor: pointer;  
+}  
+.action-menu button:hover {  
+background: #333;  
+}  
+  
+.trash-bar {  
+display: none;  
+background: #111;  
+padding: 6px;  
+text-align: right;  
+}  
+.trash-bar i {  
+cursor: pointer;  
+color: #f55;  
+font-size: 18px;  
+}  
+.notification.selected {
+  background-color: rgba(0,0,0,0.85) !important;
+}
+.light-mode .lap {  
+background: #f0f0f0f0;  
+color: #00d998;  
+}  
+.light-mode .tabHeader {  
+background: #f0f0f0f0;  
+box-shadow: 0 6px 5px rgba(0,0,0,0.4);  
+}  
+  
+.tabHeader {  
+display: flex;  
+position: relative;  
+padding: 2px;  
+background-color: #161b22;  
+padding: 7px 0;  
+font-size: 12.5px;  
+margin-top: 0px;  
+gap: 1px;  
+}  
+.light-mode .tab {  
+color: #00d998;  
+}  
+.light-mode .tab.active {  
+color:black;  
+}  
+.tab {  
+flex: 1;  
+text-align: center;  
+padding: 5px;  
+color: white;  
+transition: color 0.3s ease;  
+}  
+.tab.active {color: var(--header-color,#00ffcc);  
+}  
+.light-mode .underline{  
+background: #00d998;  
+}  
+  
+.underline {  
+position: absolute;  
+bottom: 0;  
+height: 3px;  
+width: 32%;  
+background-color: var(--header-color,#00ffcc);  
+transition: left 0.3s ease;  
+border-left-width: 5px;  
+align-content: center;  
+  
+}  
+.tab-pane {  
+display: none;  
+padding: 5px;  
+user-select: none;  
+-webkit-user-select: none;  
+-moz-user-select: none;  
+-ms-user-select: none;  
+}  
+  
+.tab-pane.active {  
+display: block;  
+margin-left: 0px;  
+margin-top: 10px;  
+color: #f0f0f0f0;  
+font-size: 10px;  
+margin-bottom: 5px;  
+height: auto;  
+border-radius: 15px 15px 15px 15px;  
+background: #10151d;  
+}  
+.light-mode .tab-pane.active {  
+color: black;  
+background: #f0f0f0;  
+}  
+.light-mode .notification.selected {
+  background-color: lightgray !important;
+}
+  
+body.light-mode  {  
+background: #f0f0f0;  
+color: yellow;  
+}  
+  
+body.light-mode p {  
+color: black;  
+}  
+  
+.tab-pane * {  
+pointer-events: auto;  
+}  
+</style>  
+  
+<script>      
+document.addEventListener("DOMContentLoaded", () => {      
+  // Tab switching        
+  const tabs = document.querySelectorAll(".tab");        
+  const panes = document.querySelectorAll(".tab-pane");        
+  const underline = document.querySelector(".underline");    tabs.forEach((tab, index) => {    
+tab.addEventListener("click", () => {    
+tabs.forEach(t => t.classList.remove("active"));    
+panes.forEach(p => p.classList.remove("active"));    
+tab.classList.add("active");    
+panes[index].classList.add("active");    
+    
+// underline follows active tab      
+  underline.style.width = `${tab.offsetWidth}px`;        
+  underline.style.left = `${tab.offsetLeft}px`;        
+});    
+    
+});    
+    
+// Back button    
+const backBtn = document.getElementById("backBtn");    
+if (backBtn) {    
+backBtn.addEventListener("click", () => {    
+window.history.back();    
+});    
+}    
+});    
+// ======= Theme Toggle (Light/Dark) =======    
+const THEME_KEY = "theme";    
+    
+// Apply theme when page loads    
+function applyTheme(theme) {    
+if (theme === "light") {    
+document.body.classList.add("light-mode");    
+document.body.setAttribute("data-theme", "light");    
+} else {    
+document.body.classList.remove("light-mode");    
+document.body.setAttribute("data-theme", "dark");    
+}    
+}// Load stored theme (default = dark)    
+window.addEventListener("DOMContentLoaded", () => {    
+const savedTheme = localStorage.getItem(THEME_KEY) || "dark";    
+applyTheme(savedTheme);    
+});    
+const tabPanes = document.querySelectorAll(".tab-pane");    
+// Prevent right-click context menu    
+tabPanes.forEach(pane => {    
+  pane.addEventListener("contextmenu", e => e.preventDefault()); // block right-click    
+  pane.addEventListener("copy", e => e.preventDefault());        // block copy    
+  pane.addEventListener("cut", e => e.preventDefault());         // block cut    
+  pane.addEventListener("paste", e => e.preventDefault());       // block paste    
+});    
+document.addEventListener("DOMContentLoaded", () => {    
+  const menuDots = document.getElementById("menuDots");    
+  const actionMenu = document.getElementById("actionMenu");    
+    
+  // Toggle menu when dots are clicked    
+  menuDots.addEventListener("click", (e) => {    
+    e.stopPropagation(); // ✅ prevent closing immediately    
+    actionMenu.style.display = actionMenu.style.display === "flex" ? "none" : "flex";    
+  });    
+    
+  // Prevent clicks inside menu from closing it    
+  actionMenu.addEventListener("click", (e) => {    
+    e.stopPropagation(); // ✅ menu stays open if you click inside    
+  });    
+    
+  // Close only if tapping outside    
+  document.addEventListener("click", () => {    
+    actionMenu.style.display = "none";    
+  });    
+});    
+</script>  
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyA4zf2fOCRQrRBDdiE5oSd2-PVWl_bZm9Q",
+  authDomain: "tunnelapp-c3ea8.firebaseapp.com",
+  projectId: "tunnelapp-c3ea8",
+  storageBucket: "tunnelapp-c3ea8.appspot.com",
+  messagingSenderId: "242347925971",
+  appId: "1:242347925971:web:5ad8dac436e256d574cf26",
+  measurementId: "G-F1JVZR77NH"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Tab panes
+const transactionsPane = document.getElementById("transactionsPane");
+const importantPane = document.getElementById("importantPane");
+const chatsPane = document.getElementById("chatsPane");
+const panes = { transactions: transactionsPane, important: importantPane, chats: chatsPane };
+
+// Track which tabs have been visited to prevent re-marking
+const visitedTabs = new Set();
+
+// Relative time helper
+function timeAgo(timestamp) {
+  if (!timestamp) return "";
+  const seconds = Math.floor((new Date() - timestamp.toDate()) / 1000);
+  const intervals = [
+    { label: "year", seconds: 31536000 },
+    { label: "month", seconds: 2592000 },
+    { label: "day", seconds: 86400 },
+    { label: "hr", seconds: 3600 },
+    { label: "min", seconds: 60 },
+    { label: "sec", seconds: 1 }
+  ];
+  for (const interval of intervals) {
+    const count = Math.floor(seconds / interval.seconds);
+    if (count >= 1) return `${count} ${interval.label}${count !== 1 ? "s" : ""} ago`;
+  }
+  return "just now";
+}
+
+// ----- Selection Mode -----
+let selectMode = false;
+const selectModeBtn = document.getElementById("selectModeBtn");
+selectModeBtn.addEventListener("click", () => {
+  selectMode = !selectMode;
+  selectModeBtn.textContent = selectMode ? "Unselect" : "Select";
+  document.body.classList.toggle("select-mode", selectMode);
+
+  // Remove old select-all
+  Object.values(panes).forEach(p => {
+    const existing = p.querySelector("#selectAllContainer");
+    if (existing) existing.remove();
+  });
+
+  if (selectMode) {
+    Object.values(panes).forEach(p => {
+      if (p.querySelectorAll(".notification").length > 0) {
+        const div = document.createElement("div");
+        div.id = "selectAllContainer";
+        div.style.padding = "5px 10px";
+        div.style.background = "";
+        div.style.borderBottom = "1px solid #333";
+        div.innerHTML = `<input type="checkbox" id="selectAll"> Select All`;
+        p.prepend(div);
+
+        const selectAllCheckbox = div.querySelector("#selectAll");
+        selectAllCheckbox.addEventListener("change", function () {
+          const checked = this.checked;
+          p.querySelectorAll(".notification").forEach(n => {
+            n.classList.toggle("selected", checked);
+            const icon = n.querySelector(".checkIcon");
+            if (icon) icon.style.display = checked ? "block" : "none";
+          });
+        });
+      }
+    });
+  }
+
+  // Deselect all notifications
+  document.querySelectorAll(".notification").forEach(n => {
+    n.classList.remove("selected");
+    const icon = n.querySelector(".checkIcon");
+    if (icon) icon.style.display = "none";
+  });
+});
+
+// Delete selected notifications
+document.getElementById("deleteBtn").addEventListener("click", () => {
+  if (!selectMode) return;
+  const activePane = document.querySelector(".tab-pane.active");
+  const selected = activePane.querySelectorAll(".notification.selected");
+  if (!selected.length) return;
+
+  const modal = document.getElementById("notificationModal");
+  const overlay = document.getElementById("modalOverlay");
+  document.getElementById("modalText").textContent = `Are you sure you want to delete ${selected.length} notification${selected.length > 1 ? "s" : ""}?`;
+  modal.style.display = "block";
+  overlay.style.display = "block";
+
+  document.getElementById("deleteSelectedBtn").onclick = async () => {
+    for (const n of selected) {
+      try {
+        const docRef = doc(db, "notifications", n.dataset.id);
+        await deleteDoc(docRef);
+        n.remove();
+      } catch (err) {
+        console.error("Failed to delete:", err.message);
+      }
+    }
+    modal.style.display = "none";
+    overlay.style.display = "none";
+  };
+  document.getElementById("cancelBtn").onclick = overlay.onclick = () => {
+    modal.style.display = "none";
+    overlay.style.display = "none";
+  };
+});
+
+// Mark selected as unread
+document.getElementById("markUnreadBtn").addEventListener("click", async () => {
+  const activePane = document.querySelector(".tab-pane.active");
+  const selected = activePane.querySelectorAll(".notification.selected");
+  for (const n of selected) {
+    const docRef = doc(db, "notifications", n.dataset.id);
+    await updateDoc(docRef, { read: false });
+    n.dataset.read = "false";
+    n.classList.remove("selected");
+    const icon = n.querySelector(".checkIcon");
+    if (icon) icon.style.display = "none";
+  }
+});
+
+// ----- Notification Element -----
+function createNotificationElement(data, docId) {
+  const div = document.createElement("div");
+  div.classList.add("notification");
+  div.dataset.id = docId;
+  div.dataset.read = data.read ? "true" : "false";
+  div.style.padding = "10px";
+  div.style.borderBottom = "1px solid #333";
+  div.style.borderRadius = "5px";
+  div.style.display = "flex";
+  div.style.flexDirection = "column";
+  div.style.position = "relative";
+  div.style.gap = "7px";
+
+  div.innerHTML = `
+    <div style="display:flex; justify-content: space-between; align-items: center;">
+      <strong style="margin-right:20px;">${data.title || "No title"}</strong>
+      <small style="font-size: 7px; color: #aaa; top: 25px; position: relative;">
+        ${data.timestamp ? timeAgo(data.timestamp) : ""}
+      </small>
+    </div>
+    <small style="font-size: 11px;">${data.message || ""}</small>
+    <i class="fas fa-check checkIcon" style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%);"></i>
+  `;
+
+  div.addEventListener("click", () => {
+    if (!selectMode) return;
+    div.classList.toggle("selected");
+    const icon = div.querySelector(".checkIcon");
+    if (icon) icon.style.display = div.classList.contains("selected") ? "block" : "none";
+  });
+
+  return div;
+}
+
+function clearAllPanes() {
+  Object.values(panes).forEach(p => (p.innerHTML = ""));
+}
+
+// ----- Auth + Snapshot -----
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    clearAllPanes();
+    Object.values(panes).forEach(p => p.innerHTML = "<p>Please log in to see notifications.</p>");
+    return;
+  }
+
+  const notifQuery = query(
+    collection(db, "notifications"),
+    where("userId", "==", user.uid),
+    orderBy("timestamp", "desc")
+  );
+
+onSnapshot(notifQuery, snapshot => {
+  // Clear all panes first to prevent duplicates
+  clearAllPanes();
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const type = (data.type || "").trim().toLowerCase();
+    const element = createNotificationElement(data, docSnap.id);
+
+    if (type === "transaction") transactionsPane.appendChild(element);
+    else if (type === "important") importantPane.appendChild(element);
+    else if (type === "chat" || type === "chats") chatsPane.appendChild(element);
+    else importantPane.appendChild(element);
+  });
+
+  // Mark first visit of active tab as read
+  if (!visitedTabs.has(activeTab)) {
+    markTabAsRead(activeTab);
+    visitedTabs.add(activeTab);
+  }
+});
+});
+
+// ----- Tab Switching -----
+const tabs = document.querySelectorAll(".tab");
+const underline = document.querySelector(".underline");
+let activeTab = "transactions"; // default
+
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    tabs.forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    const tabName = tab.textContent.trim().toLowerCase();
+    Object.entries(panes).forEach(([name, pane]) => pane.classList.toggle("active", name === tabName));
+
+    underline.style.width = `${tab.offsetWidth}px`;
+    underline.style.left = `${tab.offsetLeft}px`;
+
+    activeTab = tabName;
+
+    // Only mark unread on first visit
+    if (!visitedTabs.has(tabName)) {
+      markTabAsRead(tabName);
+      visitedTabs.add(tabName);
+    }
+  });
+});
+
+// ----- Mark as Read Function -----
+async function markTabAsRead(tabName) {
+  const pane = panes[tabName];
+  if (!pane) return;
+  const unread = pane.querySelectorAll(".notification[data-read='false']");
+  for (const n of unread) {
+    try {
+      await updateDoc(doc(db, "notifications", n.dataset.id), { read: true });
+      n.dataset.read = "true";
+    } catch (err) {
+      console.error("Failed to mark as read:", err.message);
+    }
+  }
+}
+</script>
+</body>        
+</html>  

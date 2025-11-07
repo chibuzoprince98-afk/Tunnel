@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="settings.js"></script> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <title>Flip the Coin Game</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+/* --- Title --- */
+h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2.7em;
+  opacity: 0.25;
+  color: #00d998;
+  text-shadow: 0 0 18px #00ffcc;
+  margin: 20px 0;
+  text-align: center;
+}
+
+/* --- Global --- */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: radial-gradient(circle at top, #009, #0a9, #ff5012);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* stack from top */
+  min-height: 100vh;           /* fill viewport */
+  overflow: hidden;            /* prevent scroll */
+  position: relative;
+}
+
+/* Balance */
+#balance {
+  margin: 10px 0 20px 0;
+  display: block;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px 15px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.9em;
+  box-shadow: 0 0 10px rgba(0,255,204,0.2);
+  opacity: 0.85;
+  text-align: center;
+}
+
+/* Stats row */
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  font-size: 12px;
+  margin-bottom: 25px;
+  opacity: 0.85;
+}
+.stats span {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px 25px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.8em;
+  box-shadow: 0 0 10px rgba(0,255,204,0.2);
+}
+
+/* Coin container */
+#coin-container {
+  perspective: 1200px;
+  width: 180px;
+  height: 180px;
+  margin: 60px auto 60px auto;
+}
+.coin {
+  width: 180px;
+  height: 180px;
+  position: relative;
+  transform-style: preserve-3d;
+  border-radius: 50%;
+  box-shadow: 0 0 25px rgba(255,215,0,0.6),
+              inset 0 0 20px rgba(0,0,0,0.5);
+}
+.front, .back {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.5em;
+  backface-visibility: hidden;
+  text-transform: uppercase;
+  border: 4px solid rgba(255,255,255,0.2);
+}
+.front {
+  background: radial-gradient(circle at 30% 30%, #ffdb4d, #b8860b);
+  color: #222;
+  text-shadow: 0 1px 1px #fff;
+}
+.back {
+  background: radial-gradient(circle at 30% 30%, #ff6699, #660033);
+  transform: rotateX(180deg);
+  color: #fff;
+  text-shadow: 0 1px 1px #000;
+}
+@keyframes flip {
+  0% { transform: rotateX(90deg); }
+  100% { transform: rotateX(var(--end-rotation)); }
+}
+
+/* --- Buttons --- */
+#flipBtn {
+  padding: 12px 110px;
+  margin: 8px;
+  background: linear-gradient(145deg, #00aa88, #00aa88);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.05em;
+  font-weight: bold;
+  color: #111;
+  box-shadow: 0 0 9px #0ffccccc;
+  transition: transform 0.2s, background 0.3s, box-shadow 0.3s;
+}
+#flipBtn:hover:enabled {
+  transform: translateY(-1px) scale(1);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2));
+  box-shadow: 0 0 20px #00ffcccc;
+}
+#flipBtn:disabled {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: none;
+  color: #777;
+  cursor: not-allowed;
+}
+#retryBtn {
+  background:var(--header-color,#00ffcc);
+ font-size: 10px;
+}
+/* --- Result --- */
+#result {
+  margin-top: 15px;
+  font-size: 1.3em;
+  font-weight: bold;
+  min-height: 24px;
+  text-shadow: 0 0 10px rgba(0,255,204,0.5);
+}
+
+/* Background stars */
+body::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: transparent url('https://www.transparenttextures.com/patterns/stardust.png') repeat;
+  opacity: 0.9;
+  z-index: -1;
+}
+
+/* Choice buttons */
+.choice {
+  padding: 10px 50px;
+  margin: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: transparent;
+  color: white;
+  opacity: 0.5;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+.choice.active {
+  background: #00d998;
+  color: #000;
+}
+.choice.locked {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal.show { opacity: 1; pointer-events: auto; }
+.modal-content {
+  background: #f0f0f0f0;
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 320px;
+  width: 80%;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  transform: scale(0.7);
+  animation: zoomIn 0.3s ease forwards;
+}
+@keyframes zoomIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.modal-content h2 { margin: 0 0 10px; font-size: 18px; color: #888; }
+.modal-content p { font-size: 14px; color: #555; margin-bottom: 20px; }
+.modal-buttons { display: flex; justify-content: space-around; }
+.modal-buttons button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+#stayBtn { background: #00ffcc; color: #000; }
+#leaveBtn { background: #f44336; color: #fff; }
+
+/* Notification */
+#notification {
+  position: fixed;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 10px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10000;
+}
+#notification.error { background-color: #ff4d4f; color: white; }
+#notification.success { background-color: #4caf50; color: white; }
+#notificationClose {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  padding: 0 5px 0 15px;
+  line-height: 1;
+}
+@keyframes slideDown {
+  from { transform: translateY(-100%) translateX(-50%); opacity: 0; }
+  to { transform: translateY(0) translateX(-50%); opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(0) translateX(-50%); opacity: 1; }
+  to { transform: translateY(-100%) translateX(-50%); opacity: 0; }
+}
+#notification.slide-in { animation: slideDown 0.4s forwards; }
+#notification.slide-out { animation: slideUp 0.4s forwards; }
+
+/* Loader */
+#loadingModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(30,30,30,0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+button:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+.spinner {
+  border: 3px solid rgba(255,255,255,0.12);
+  border-top: 3px solid var(--header-color,#00ffcc);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 14px;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.loading-text { color: var(--header-color,#00ffcc); font-size: 11px; margin-bottom: 10px; text-align:center; max-width: 85%; }
+.loader-sub { color: #bdbdbd; font-size: 11px; margin-bottom: 12px; text-align:center; }
+.loader-actions { display:flex; gap:12px; }
+.loader-actions button {
+  background:#00ffcc;
+  border:none;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+}
+#mainContent { opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+#mainContent.active { opacity: 1; pointer-events: auto; }
+    </style>
+<body>
+  <!-- Loader (shows first) -->
+  <div id="loadingModal" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="loading-text" id="loadingText">Loading...</div>
+    <div class="loader-sub" id="loaderSub">Please wait</div>
+    <div class="loader-actions" id="loaderActions" style="display:none;">
+      <button id="retryBtn">Retry</button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT (hidden until loader finishes) -->
+  <div id="mainContent">
+    
+    <!-- Notification -->
+    <div id="notification" role="alert" aria-live="assertive">
+      <span id="notificationMessage"></span>
+      <button id="notificationClose" aria-label="Close notification">&times;</button>
+    </div>
+
+    <!-- Exit Modal -->
+    <div id="exitModal" class="modal">    
+      <div class="modal-content">    
+        <h2>Exit Confirmation</h2>    
+        <p>Are you sure you want to leave?</p>    
+        <div class="modal-buttons">    
+          <button id="stayBtn">Stay</button>    
+          <button id="leaveBtn">Leave</button>    
+        </div>    
+      </div>    
+    </div>
+
+    <!-- Title -->
+    <h1>Flip the coin</h1>   
+
+    <!-- Balance + Stats -->
+    <span id="balance">Balance: 0</span>
+    <div class="stats">
+      <span id="earned">Earned: 0</span>
+      <span id="lost">Lost: 0</span>
+    </div>
+
+    <!-- Coin -->
+    <div id="coin-container">
+      <div class="coin" id="coin">
+        <div class="front">HEADS</div>
+        <div class="back">TAILS</div>
+      </div>
+    </div>
+
+    <!-- Choices -->
+    <div class="choice-buttons">
+      <button id="headBtn" class="choice">Head</button>
+      <button id="tailBtn" class="choice">Tail</button>
+    </div>
+
+    <!-- Flip Button -->
+    <button id="flipBtn" disabled>Flip Coin</button>
+
+    <!-- Result -->
+    <p id="result"></p>
+  </div>
+</body>
+<script type="module">
+// Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc, increment, addDoc, collection, serverTimestamp, setDoc } 
+  from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyA4zf2fOCRQrRBDdiE5oSd2-PVWl_bZm9Q",
+  authDomain: "tunnelapp-c3ea8.firebaseapp.com",
+  projectId: "tunnelapp-c3ea8",
+  storageBucket: "tunnelapp-c3ea8.appspot.com",
+  messagingSenderId: "242347925971",
+  appId: "1:242347925971:web:5ad8dac436e256d574cf26",
+  measurementId: "G-F1JVZR77NH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// DOM refs
+const coin = document.getElementById("coin");
+const resultText = document.getElementById("result");
+const balanceEl = document.getElementById("balance");
+const earnedEl = document.getElementById("earned");
+const lostEl = document.getElementById("lost");
+const headBtn = document.getElementById("headBtn");
+const tailBtn = document.getElementById("tailBtn");
+const flipBtn = document.getElementById("flipBtn");
+
+let userId = null;
+let userChoice = null;
+let stats = { coin: 0, earned: 0, lost: 0 };
+let isFlipping = false;
+
+// --- Helpers ---
+function updateUI() {
+  balanceEl.textContent = "Balance: " + stats.coin;
+  earnedEl.textContent = "Earned: " + stats.earned;
+  lostEl.textContent = "Lost: " + stats.lost;
+}
+
+async function loadStats() {
+  const snap = await getDoc(doc(db, "users", userId));
+  if (snap.exists()) {
+    stats = {
+      coin: snap.data().coin,
+      earned: snap.data().earned || 0,
+      lost: snap.data().lost || 0
+    };
+    updateUI();
+
+    if (stats.coin < 10) {
+      flipBtn.disabled = true;
+      headBtn.disabled = true;
+      tailBtn.disabled = true;
+      showNotification("Not enough coins", "error");
+    } else {
+      headBtn.disabled = false;
+      tailBtn.disabled = false;
+    }
+  }
+}
+
+// --- Choice Logic ---
+function activateChoice(button, choice) {
+  if (isFlipping) return; // prevent changing during flip
+  headBtn.classList.remove("active");
+  tailBtn.classList.remove("active");
+  button.classList.add("active");
+  userChoice = choice;
+  flipBtn.disabled = false;
+}
+
+headBtn.addEventListener("click", () => activateChoice(headBtn, "HEADS"));
+tailBtn.addEventListener("click", () => activateChoice(tailBtn, "TAILS"));
+
+// --- Session Tracker ---
+let sessionCoinsEarned = 0;
+let sessionCoinsLost = 0;
+
+function startEventSession() {
+  sessionCoinsEarned = 0;
+  sessionCoinsLost = 0;
+}
+
+function spendCoins(amount) {
+  sessionCoinsLost += amount;
+}
+
+function earnCoins(amount) {
+  sessionCoinsEarned += amount;
+}
+
+async function endEventSession(userId) {
+  if (!userId) return;
+  try {
+    await addDoc(collection(db, "notifications"), {
+      userId,
+      type: "transaction",
+      title: "Event Summary",
+      message: `Session ended<br>
+<i class="fa fa-arrow-down" style="color:red; transform: rotate(45deg);"></i> : ${sessionCoinsLost} coins<br>
+<i class="fa fa-arrow-up" style="color:green; transform: rotate(45deg);"></i> : ${sessionCoinsEarned} coins<br>From Flip the coin`,
+      lost: sessionCoinsLost,
+      earned: sessionCoinsEarned,
+      coinsChange: sessionCoinsEarned - sessionCoinsLost,
+      timestamp: serverTimestamp(),
+      read: false
+    });
+    console.log("Event summary notification created ✅");
+  } catch (err) {
+    console.error("Error writing session notification:", err);
+  }
+
+  sessionCoinsEarned = 0;
+  sessionCoinsLost = 0;
+}
+
+// --- Flip Logic ---
+let coinSequence = [
+  "HEADS", "TAILS", "TAILS", "HEADS",
+  "TAILS", "HEADS", "HEADS", "TAILS"
+];
+let sequenceIndex = 0;
+coinSequence = shuffleSequence(coinSequence);
+
+flipBtn.onclick = async () => {
+  if (flipBtn.disabled || isFlipping) return;
+  flipBtn.disabled = true;
+  isFlipping = true;
+
+  if (!userId) {
+    showNotification("Please wait!", "error");
+    resetFlipLock();
+    return;
+  }
+
+  if (!userChoice) {
+    showNotification("Pick Head or Tail first!", "error");
+    resetFlipLock();
+    return;
+  }
+
+  const docRef = doc(db, "users", userId);
+  const snap = await getDoc(docRef);
+  if (!snap.exists()) {
+    resetFlipLock();
+    return;
+  }
+
+  let data = snap.data();
+  if (data.coin < 10) {
+    showNotification("Not enough coins!", "error");
+    resetFlipLock();
+    return;
+  }
+
+  headBtn.classList.add("locked");
+  tailBtn.classList.add("locked");
+
+  // Deduct 10 coins for the flip
+  await updateDoc(docRef, { coin: increment(-10) });
+  stats.coin -= 10;
+  updateUI();
+  spendCoins(10);
+
+  const result = coinSequence[sequenceIndex];
+  sequenceIndex = (sequenceIndex + 1) % coinSequence.length;
+
+  const endRotation = result === "HEADS" ? "1080deg" : "1260deg";
+  coin.style.animation = "none"; coin.offsetHeight;
+  coin.style.setProperty("--end-rotation", endRotation);
+  coin.style.animation = "flip 3s ease-out forwards";
+
+  coin.addEventListener("animationend", async () => {
+    if (result === userChoice) {
+      await updateDoc(docRef, { coin: increment(30), earned: increment(30) });
+      stats.coin += 30;
+      stats.earned += 30;
+      earnCoins(30);
+      showNotification(`That was ${result}! You Won! +30 coins`, "success");
+    } else {
+      await updateDoc(docRef, { lost: increment(10) });
+      stats.lost += 10;
+      showNotification(`Oops, that was ${result}, you lost -10 coins`, "error");
+    }
+
+    updateUI();
+    userChoice = null;
+    resetFlipLock();
+  }, { once: true });
+};
+
+// Reset buttons safely
+function resetFlipLock() {
+  isFlipping = false;
+  flipBtn.disabled = true;
+  headBtn.classList.remove("locked", "active");
+  tailBtn.classList.remove("locked", "active");
+}
+
+// Fisher-Yates shuffle
+function shuffleSequence(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// --- Auth & User Load ---
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    // Sign in anonymously if no user
+    await signInAnonymously(auth);
+    return; // will trigger onAuthStateChanged again with new user
+  }
+
+  userId = user.uid;
+
+  showLoader("Loading your coins...", "Please wait");
+
+  // Wait if offline
+  if (!navigator.onLine) {
+    await waitForOnline();
+    showLoader("Back online", "Resuming load...");
+  }
+
+  const userRef = doc(db, "users", userId);
+  try {
+    const snap = await getDoc(userRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      stats.coin = data.coin ?? 100;
+      stats.lost = data.lost ?? 0;
+      stats.earned = data.earned ?? 0;
+    } else {
+      // Create new user record
+      stats.coin = 100;
+      stats.lost = 0;
+      stats.earned = 0;
+      await setDoc(userRef, { coin: stats.coin, lost: stats.lost, earned: stats.earned });
+    }
+
+    updateUI();
+    hideLoader();
+  } catch (err) {
+    console.error("Error loading user:", err);
+    showLoader("Failed to load data", "Check connection and retry", true);
+  }
+});
+
+// --- Network Status ---
+function setButtonsState(disabled) {
+  flipBtn.disabled = disabled || !userChoice;
+  headBtn.disabled = disabled;
+  tailBtn.disabled = disabled;
+}
+
+window.addEventListener("offline", () => {
+  setButtonsState(true);
+  showNotification("You are offline", "error", 60000);
+});
+
+window.addEventListener("online", async () => {
+  setButtonsState(false);
+  showNotification("Back online", "success", 3000);
+  if (userId) await loadStats();
+});
+
+window.addEventListener("load", () => {
+  if (!navigator.onLine) {
+    setButtonsState(true);
+    showNotification("You are offline", "error", 60000);
+  }
+});
+
+// --- Exit Modal ---
+document.addEventListener("DOMContentLoaded", () => {
+  const exitModal = document.getElementById("exitModal");
+  const stayBtn = document.getElementById("stayBtn");
+  const leaveBtn = document.getElementById("leaveBtn");
+  let isConfirming = false;
+  let sessionEnded = false;
+
+  function showExitModal() {
+    isConfirming = true;
+    exitModal.classList.add("show");
+  }
+
+  function hideExitModal() {
+    isConfirming = false;
+    exitModal.classList.remove("show");
+  }
+
+  function endSessionOnce() {
+    if (!sessionEnded && userId) {
+      endEventSession(userId);
+      sessionEnded = true;
+    }
+  }
+
+  stayBtn.addEventListener("click", hideExitModal);
+
+  leaveBtn.addEventListener("click", () => {
+    endSessionOnce();
+    hideExitModal();
+    window.history.go(-2);
+  });
+
+  window.history.pushState({ page: 1 }, "", "");
+  window.addEventListener("popstate", () => {
+    if (!isConfirming) {
+      endSessionOnce();
+      showExitModal();
+      window.history.pushState({ page: 1 }, "", "");
+    }
+  });
+});
+
+// --- Notification ---
+const notification = document.getElementById('notification');
+const notificationMessage = document.getElementById('notificationMessage');
+const notificationClose = document.getElementById('notificationClose');
+let notificationTimeout;
+
+function showNotification(msg, type = 'error', duration = 3850) {
+  clearTimeout(notificationTimeout);
+  notification.className = '';
+  notificationMessage.textContent = msg;
+  notification.classList.add(type, 'slide-in');
+  notification.style.display = 'flex';
+  notificationTimeout = setTimeout(() => {
+    notification.classList.remove('slide-in');
+    notification.classList.add('slide-out');
+  }, duration);
+}
+
+notification.addEventListener('animationend', (e) => {
+  if (e.animationName === 'slideUp') {
+    notification.style.display = 'none';
+    notification.className = '';
+    notificationMessage.textContent = '';
+  }
+});
+
+notificationClose.addEventListener('click', () => {
+  notification.style.display = 'none';
+  notificationMessage.textContent = '';
+});
+// --- Loader ---
+const loadingModal = document.getElementById("loadingModal");
+const loaderSub = document.getElementById("loaderSub");
+const loaderActions = document.getElementById("loaderActions");
+const retryBtn = document.getElementById("retryBtn");
+const mainContent = document.getElementById("mainContent");
+
+function showLoader(main = "Loading...", sub = "Please wait", showActions = false) {
+  loadingModal.querySelector("#loadingText").textContent = main;
+  loaderSub.textContent = sub;
+  loaderActions.style.display = showActions ? "flex" : "none";
+  loadingModal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+  mainContent.classList.remove("active");
+}
+
+function hideLoader() {
+  loadingModal.style.display = "none";
+  document.body.style.overflow = "auto";
+  mainContent.classList.add("active");
+} 
+
+function waitForOnline() {
+  return new Promise(resolve => {
+    if (navigator.onLine) return resolve();
+    showLoader("You're offline", "Waiting for connection...");
+    const onOnline = () => {
+      window.removeEventListener("online", onOnline);
+      resolve();
+    };
+    window.addEventListener("online", onOnline);
+  });
+}
+
+retryBtn.addEventListener("click", async () => {
+  location.reload();
+  loaderActions.style.display = "none";
+  showLoader("Retrying...");
+});
+
+</script>
+</body>
+</html>

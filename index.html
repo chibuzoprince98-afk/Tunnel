@@ -1,0 +1,1521 @@
+<!DOCTYPE html>        
+<html lang="en">          
+<head>          
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
+ <title>Tunnel Dashboard</title>
+ <script src="settings.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">          
+  <script src="https://kit.fontawesome.com/38dd62437a.js" crossorigin="anonymous"></script>
+  
+</head>          
+<body>
+  <!-- Toast -->
+<div id="exitToast">Do back gesture again to exit</div>
+
+<style>
+.light-mode #exitToast {
+  background: #00d998;
+  color: white;
+}
+#exitToast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--header-color,#00ffcc);
+  color: #000;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 4px;
+  font-weight: bold;
+  display: none;
+  z-index: 2000;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  let backPressedOnce = false;
+  let toastTimer = null;
+  const exitToast = document.getElementById("exitToast");
+
+  // Example modal
+  const modal = document.getElementById("myModal");
+
+  function isModalOpen() {
+    return modal && modal.style.display === "flex";
+  }
+
+  function resetExitGesture() {
+    backPressedOnce = false;
+    if (toastTimer) clearTimeout(toastTimer);
+    exitToast.style.display = "none";
+  }
+
+  history.pushState(null, "", location.href);
+
+  window.addEventListener("popstate", () => {
+    if (isModalOpen()) {
+      // Close modal instead of triggering exit
+      modal.style.display = "none";
+      resetExitGesture(); // cancel any exit attempt
+      history.pushState(null, "", location.href);
+      return;
+    }
+
+    if (backPressedOnce) {
+      // Exit on second back
+      window.location.replace("about:blank");
+    } else {
+      // First back → show toast
+      backPressedOnce = true;
+      exitToast.style.display = "block";
+
+      toastTimer = setTimeout(() => {
+        resetExitGesture(); // cancel gesture after 2s if no second back
+      }, 2000);
+
+      history.pushState(null, "", location.href);
+    }
+  });
+});
+</script>
+
+  <header class="top-pad">          
+    <i class="fas fa-bars icon left-icon" id="openMenu"></i> <span><h1>Tunnel</h1></span>          
+    <i id="bellIcon" class="fas fa-bell icon right-icon"></i>      
+<span id="notifIndicator" class="indicator"></span>  
+  </header> 
+    <div id="pull-indicator" aria-hidden="true" role="status" aria-live="polite">
+    <div class="spinner" id="spinner" aria-hidden="true"></div>
+    <div class="pull-text" id="pullText"></div>
+  </div>
+  <main id="scrollable" class="content">
+  <section class="welcome-message">          
+    <small>Welcome, <span id="nickname">user</span></small><br>          
+  </section>    <section class="balance-section">          
+    <h2>Coin Dashboard</h2>          
+    <div class="balance-card">          
+      <p><strong class="bal">Coin Bal: <span id="coin">...cs</span></strong></p>          
+      <div class="coin-stats">          
+        <div class="lost">          
+          <span>Lost: <span id="lost">0cs</span></span>          
+     <select id="lostSelect">
+        <option value="">--Select--</option>
+        <option value="clearLost">Clear Lost Coins</option>
+        <option value="viewLost">View Total Lost</option>
+      </select>   
+        </div>          
+        <div class="gained">          
+          <span>Earned: <span id="earned">0cs</span></span><br>
+                <select id="earnedSelect">
+        <option value="">--Select--</option>
+        <option value="clearEarned">Clear Earned Coins</option>
+        <option value="viewEarned">View Total Earned</option>
+      </select>
+    </div>          
+  </div>      
+<button class="get-btn" id="getBtn">Get coins</button></div>  
+</section> 
+<div id="csModal" class="cs-modal">
+  <div class="cs-modal-content">
+    <h3 id="modalTitle"></h3>
+    <p id="modalBody"></p>
+    <div class="cs-modal-actions">
+            <button id="cancelBtn" class="cs-btn">Cancel</button>
+      <button id="okBtn" class="cs-btn">OK</button>
+    </div>
+  </div>
+</div>
+
+  <section class="event-carousel">          
+  <h2>Game Events</h2>          
+  <div class="carousel-container">          
+<div class="carousel-wrapper" id="carouselWrapper">          
+  <div class="event-card" data-page="spin.html" 
+       style="background-image: url('1.png');">
+  </div>          
+
+  <div class="event-card" data-page="flip.html" 
+       style="background-image: url('images/flip.jpg');"></div>          
+  <div class="event-card" data-page="dice.html" 
+       style="background-image: url('.png');">
+  </div>          
+</div>    
+    <div class="dots">          
+      <span class="dot active"></span>    
+      <span class="dot"></span>          
+      <span class="dot"></span>          
+    </div>          
+  </div>          
+</section>
+    <h2>🏆 Leaderboard</h2> 
+  <div id="leaderboard" class="leaderboard"></div>
+    <p class="leaderboard-note">Waiting for live data…</p>  
+    <!-- Slide-out Menu -->  <div id="side-menu" class="side-menu">        
+  <i class="fas fa-arrow-left close-menu"></i>        
+  <ul>        
+    <li><i id="userIcon" class="fas fa-user"></i> <span id="userId">Profile</span></li>
+    <li><i class="fas fa-user-friends" style="font-size: 12px;"></i><span id="referral">Referrals</span></li>
+    <li>  
+  <i class="fas fa-adjust"></i><span onclick="toggleTheme()">Themes</span><span class="theme-toggle-icon">        
+ </span>        
+</li>       
+    <li><i class="fas fa-cog"></i><span id="settings">Settings</span></li>   
+    <li><i class="fa fa-circle-info"></i><span id="About">About</span></li> 
+            <li><i class="fa-solid fa-headset"></i><span id="contact">Contact us</span></li>  
+<li><i class="fas fa-sign-out-alt"></i><span id="logoutBtn">Logout</span></li>
+<div id="logoutModal" class="modal">
+  <div class="modal-content">
+    <p class="logii">Confirm Logout</p><br>
+    <p class="twt">Are you sure you want to sign out?</p>
+    <div class="modal-actions">
+      <button id="cancelLogout">Cancel</button>
+      <button id="confirmLogout" class="danger">Logout</button>
+    </div>
+  </div>
+</div>
+  </ul>        
+</div>  
+  <div id="userStars"></div>  
+</section> 
+</body>     
+<style> 
+  .cs-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:9999; }
+  .cs-modal.show { display:flex; }
+  .cs-modal-content {
+    font-size: 12px;background:#161b22; color:#fff; padding:20px; border-radius:8px; min-width:280px; max-width:80%; text-align:center; }
+  .cs-modal-actions { display:flex; justify-content:center; gap:20px; margin-top:15px; }
+  .cs-btn { background:#00cc99; color:#fff; border:none; padding:8px 14px; border-radius:5px; cursor:pointer; font-size:11px; }
+  .cs-btn:hover { background:#00b589; }
+  /* Zoom in when modal opens */
+.cs-modal.show {
+  display: flex;
+  animation: zoomIn 0.4s ease forwards;
+}
+.twt{
+  color: #f0f0f0;
+  font-size: 12px;
+}
+/* Zoom out when modal closes */
+.cs-modal.closing {
+  animation: zoomOut 0.3s ease forwards;
+}
+
+/* Keyframes */
+@keyframes zoomIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes zoomOut {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.7); opacity: 0; }
+}
+  * {        
+  margin: 0;        
+  padding: 0;        
+  box-sizing: border-box;        
+  font-family: 'Segoe UI', sans-serif;        
+} 
+body {    
+background-color: #0d1117;    
+color: #ffffff;    
+padding: 0 15px;    
+height: 200vh;   
+}  
+/* Header Pad */
+.top-pad {
+background-color: #161b22;
+padding:  16px;
+color: var(--header-color,#00ffcc);
+font-size: 20px;
+position: relative;
+display: flex;
+align-items: center;
+justify-content: center;
+width: 100vw;
+box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+right: 15px;
+
+}
+.light-mode .dot.active {
+background: #00d998;
+}
+.light-mode .top-pad {
+background: #f0f0f0;
+}
+.light-mode .top-pad h1 {
+color: #00d998;
+}
+.light-mode .icon {
+color: #00d998;
+}
+.light-mode .balance-card {
+background: #f0f0f0;
+color: black;
+border: none;
+box-shadow: 0 5px 5px rgba(0,0,0,0.4);
+border-top: 1px solid white;
+}
+/* Modal Overlay */
+.modal {
+  font-size: 9px;
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.light-mode .modal-content {
+  background: #f0f0f0f0;
+}
+.light-mode .twt {
+  color: black;
+}
+/* Modal Box */
+.modal-content {
+  background: var(--bg, #1e1e1e);
+  color: var(--text, #fff);
+  border-radius: 16px;
+  padding: 20px;
+  font-size: 6px;
+  width: 90%;
+  max-width: 320px;
+  text-align: center;
+  transform: scale(0.8);
+  opacity: 0;
+  transition: 0.3s ease;
+}
+.logii {
+  font-weight: bold;
+  font-size: 18px;
+  color: #f0f0f0;
+}
+.light-mode .logii{
+  color: black;
+}
+/* Show Animation */
+.modal.show .modal-content {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Buttons */
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-actions button {
+  flex: 1;
+  margin: 0 5px;
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.modal-actions button:hover {
+  opacity: 0.85;
+}
+
+#cancelLogout {
+  background: #333;
+  color: #fff;
+}
+.light-mode #confirmLogout.danger{
+  background-color: #00b589;
+  color: white;
+}
+#confirmLogout.danger {
+  background: var(--header-color,#00ffcc);
+  color: #000;
+}
+.indicator {
+display: none;
+background: red;
+color: white;
+font-size: 8px;
+border-radius: 50%;
+padding: 3.5px;
+text-align: center;
+position: absolute;
+top: 11px;
+right: 9px;
+width: 5vw;
+}
+.light-mode .bal {
+color: black;
+}
+.light-mode .coin-stats {
+color: black;
+}
+.top-pad h1 {
+color: var(--header-color,#00ffcc);
+font-size: 20px;
+}
+
+.icon {
+font-size: 18px;
+color: var(--header-color,#00ffcc);
+position: absolute;
+top: 22px;
+cursor: pointer;
+}
+
+.left-icon {
+left: 15px;
+}
+
+.right-icon {
+right: 15px;
+}
+
+/* Welcome Message */
+.welcome-message {
+margin: 15px 0 5px 5px;
+margin-bottom: 25px;
+
+}
+
+.welcome-message small {
+font-size: 10px;
+color: auto;
+margin-bottom: 20px;
+}
+
+/* Balance Dashboard */
+.balance-section {
+margin-top: 60px;
+
+}
+
+.balance-section h2 {
+font-size: 16px;
+margin-bottom: 10px;
+color: var(--header-color,#00ffcc);
+}
+
+.balance-card {
+background-color: #161b22;
+padding: 15px;
+border-radius: 12px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+margin-bottom: 50px;
+height: 162px;
+}
+
+.coin-stats {
+display: flex;
+flex-direction: column;
+gap: 10px;
+margin-top: 10px;
+}
+
+.coin-stats div {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 10px;
+font-size: 10px;
+}
+
+.coin-stats select {
+background-color: #0d111790;
+color: var(--header-color,#00ffcc);
+border: 1px solid var(--header-color,#00ffcc);
+border-radius: 5px;
+padding: 3px 5px;
+font-size: 6px;
+outline: none;
+}
+.light-mode .coin-stats select {
+background: transparent;
+border: 1px solid #00d998;
+color: black;
+}
+/* Main container with overflow hidden to hide scrollbars */
+.carousel-container {
+position: relative;
+width: 100vw;
+overflow: hidden;
+padding: 10px 10px;
+margin-top: 30px;
+background-color: ;
+border-radius: 4px;
+right: 16px;
+}
+.carousel-wrapper p {
+font-size: 6px;
+margin-left: 1px;
+}
+.event-carousel h2 {
+font-size: 16px;
+color: var(--header-color,#00ffcc);
+position: relative;
+bottom: -16px;
+right: 0px;
+}
+
+.carousel-wrapper {
+  border-radius: 10px;
+display: flex;
+overflow-x: scroll;
+scroll-snap-type: x mandatory;
+scroll-behavior: smooth;
+-webkit-overflow-scrolling: touch;
+}
+
+.event-card {
+  filter: brightness(40); /* makes image brighter */
+  /* or */
+  filter: contrast(20);   /* increases contrast */
+  /* or */
+  filter: saturate(1.3);   /* makes colors stronger */
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  padding: 109px 15px 50px;
+  background-size:340px 162px ;       /* Makes image cover the whole card */
+  background-position: center;  /* Centers the image */
+  background-repeat: no-repeat;
+  color: white;
+  font-size: 1.2em;
+  border-radius: 10px;
+  margin-right: 10px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Keeps text at bottom */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* optional depth effect */
+}
+
+/* Optional overlay for better text readability */
+.event-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: ; /* semi-transparent overlay */
+  border-radius: 10px;
+  z-index: 0;
+}
+
+.event-card p, .event-card br, .event-card span {
+  position: relative;
+  z-index: 1; /* ensures text is above overlay */
+}
+
+/* Dot container */
+.dots {
+display: flex;
+justify-content: center;
+margin-top: 10px;
+
+}
+
+.dot {
+width: 8px;
+height: 8px;
+background-color: #ccc;
+border-radius: 45%;
+margin: 0 5px;
+transition: background-color 0.3s ease;
+}
+
+/* Highlight the active one */
+.dot.active {
+background-color: var(--header-color, #00ffcc);
+}
+.light-mode .get-btn {
+color: white;
+background: #00d998;
+}
+.light-mode .get-btn:hover {
+background: #00a999;
+}
+.light-mode .event-carousel h2 {
+color: #00d998;
+}
+
+.get-btn {
+  border: none;
+  color: black;
+  background-color: var(--header-color, #00ffcc);/* uses saved theme */
+  border-radius: 5px;
+  position: relative;
+  top: 18px;
+  font-size: 12px;
+  padding: 4px;
+  border: ;
+  
+}
+@keyframes zoomPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+.zoom-pop {
+  animation: zoomPop 0.2s ease-in-out;
+}
+.get-btn:hover {
+  background-color: var(--header-color, #00ffcccc);
+}
+
+/* Leaderboard Title outside the pad */
+
+ h2{
+position: relative;
+margin-top: 54px;
+margin-bottom: 20px;
+font-size: 17px;
+color: var(--header-color,#00ffcc);
+}
+
+/* Main leaderboard container */
+.leaderboard {
+background-color: #003366;
+padding: 10px;
+border-radius: 8px;
+display: flex;
+flex-direction: column;
+gap: -8px;
+}
+#leaderboard {
+  max-height: 500px;   /* adjust to your layout */
+  overflow-y: auto;  /* keeps scrollbar away from cards */
+}
+
+/* Optional: style the scrollbar for better look */
+#leaderboard::-webkit-scrollbar {
+  width: 6px;
+}
+
+
+/* Optional small note under leaderboard */
+.leaderboard-note {
+font-size: 0.75rem;
+color: #999;
+margin-top: 6px;
+text-align: center;
+}
+
+/* Slide-out Menu Panel */
+.side-menu {
+position: fixed;
+top: 0;
+left: -60%;
+width: 60%;
+height: 100%;
+background-color: #161b22;
+transition: left 0.3s ease, background-color 0.3s ease;
+z-index: 999;
+padding: 20px 15px;
+}
+
+.side-menu.active {
+left: 0;
+}
+
+.side-menu .close-menu {
+font-size: 18px;
+color: var(--header-color,#00ffcc);
+cursor: pointer;
+margin-bottom: 20px;
+}
+
+.side-menu ul {
+list-style: none;
+padding: 0;
+}
+
+.side-menu li {
+margin-bottom: 20px;
+color: #ffffff;
+font-size: 14px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+#userStars {
+margin-top: 20px;
+font-size: 22px;
+color: gold; /* ⭐ golden stars */
+}
+
+.side-menu li i {
+color: var(--header-color,#00ffcc);
+}
+
+/* Light Theme (default) */
+body.light-mode {
+background-color: #f0f0f0;
+color: black;
+}
+body.light-mode h2 {
+color: black;
+}
+body.light-mode .top-pad {
+background-color: ;
+}
+body.light-mode .balance-card,
+body.light-mode .leaderboard, {
+background-color: #161b2;
+color: #f0f0f0;
+}
+
+body.light-mode .side-menu {
+background-color: #f0f0f0;
+color: black;
+}
+body.light-mode .side-menu li {  color: black;
+}
+
+body.light-mode .side-menu li i {
+color: #00d998;
+}
+body.light-mode .side-menu .close-menu {
+color: #00d998;
+}
+body.light-mode .event-card {
+color: white;
+background-color: #8c9d98;
+}
+body.light-mode .carousel-wrapper {
+border: none;}
+
+#pull-indicator{
+  position:fixed;
+  left:0;
+  right:0;
+  top:-80px; /* hidden by default */
+  height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  z-index:20;
+  transition:transform 180ms ease, opacity 180ms ease;
+  transform:translateY(0);
+  pointer-events:none;
+  opacity:0;
+}
+#pull-indicator.visible{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.user-card {
+  position: relative;
+  background:rgba(0, 155, 254, 0.15);
+  padding:10px 15px;
+  margin-bottom:10px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.profile { display:flex; align-items:center; gap:10px;}
+.profile img, .profile .placeholder {
+  width:30px; height:30px; border-radius:50%; object-fit:cover;
+  background:#444; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:16px;
+}
+.profile span { font-size:14px; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.stars i { color:gold; font-size:14px; margin-left:2px; }
+
+/* Reaction container */
+.reactions {
+  position: absolute;
+  top:35px;
+  right:2px;
+  display:flex;
+  background: rgba(0, 155, 04, 0.15);
+  padding: 2px 3px;
+  border-radius:12px;
+  font-size:6px;
+}
+
+/* Emoji picker */
+.emoji-picker {
+  position: absolute;
+  display:flex;
+  gap:10px;
+  max-width: 40%;
+  overflow-x: scroll;
+  background:#222;
+  border: 1px solid #00ffcc;
+  padding:4px ;
+  border-radius:10px;
+  top:90%;
+  left:80%;
+  transform:translateX(-50%);
+  z-index:1000;
+}
+.emoji-btn { font-size:15px; background:none; border:none; cursor:pointer; }
+/* Spinner default (dark mode or normal) */
+.spinner {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.08);
+  border-top-color: var(--header-color, #00ffcc);
+  animation: spin 1s linear infinite;
+}
+
+.light-mode .spinner {
+  border: 4px solid rgba(0, 0, 0, 0.08);  /* lighter border */
+  border-top-color: #00d589;          }
+.spinner.spin{
+  animation:spin 500ms linear infinite;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+</style> 
+<script>        
+// ======= Carousel Auto Slide =======        
+const wrapper = document.getElementById("carouselWrapper");
+const dots = document.querySelectorAll(".dot");
+const totalSlides = dots.length;
+let currentIndex = 0;
+let autoSlideInterval;
+let manualScrollTimeout;
+let isManualScrolling = false;
+
+// --- Update dots ---
+function updateDots(index) {
+  dots.forEach(dot => dot.classList.remove("active"));
+  if (dots[index]) dots[index].classList.add("active");
+}
+
+// --- Go to slide ---
+function goToSlide(index) {
+  wrapper.scrollTo({
+    left: wrapper.offsetWidth * index,
+    behavior: 'smooth'
+  });
+  updateDots(index);
+}
+
+// --- Start auto scroll ---
+function startAutoScroll() {
+  stopAutoScroll(); // ensure only one runs
+  autoSlideInterval = setInterval(() => {
+    currentIndex = (currentIndex + 1) % totalSlides;
+    goToSlide(currentIndex);
+  }, 3000);
+}
+
+// --- Stop auto scroll ---
+function stopAutoScroll() {
+  clearInterval(autoSlideInterval);
+}
+
+// --- Detect manual scroll ---
+let scrollTimeout;
+wrapper.addEventListener("scroll", () => {
+  // Stop auto scroll when user starts scrolling manually
+  if (!isManualScrolling) {
+    isManualScrolling = true;
+    stopAutoScroll();
+  }
+
+  clearTimeout(scrollTimeout);
+  scrollTimeout = setTimeout(() => {
+    const index = Math.round(wrapper.scrollLeft / wrapper.offsetWidth);
+    currentIndex = index % totalSlides;
+    updateDots(currentIndex);
+
+    // Wait 2 seconds after manual scroll inactivity to resume auto scroll
+    clearTimeout(manualScrollTimeout);
+    manualScrollTimeout = setTimeout(() => {
+      isManualScrolling = false;
+      startAutoScroll();
+    }, 2000);
+  }, 100);
+});
+
+// --- Initialize ---
+startAutoScroll();
+
+  document.getElementById("referral").addEventListener("click", () => {
+    window.location.href = "ref.html";
+  });
+    document.getElementById("contact").addEventListener("click", () => {
+    window.location.href = "contact.html";
+  });
+    
+// ======= Side Menu Slide Toggle =======    
+const menuBtn = document.getElementById("openMenu");    
+const closeBtn = document.querySelector(".close-menu");    
+const sideMenu = document.getElementById("side-menu");    
+    
+menuBtn.addEventListener("click", () => sideMenu.classList.add("active"));    
+closeBtn.addEventListener("click", () => sideMenu.classList.remove("active"));    
+    
+// ======= Theme Toggle (Light/Dark) =======    
+const THEME_KEY = 'theme';    
+    
+function toggleTheme() {    
+  const body = document.body;    
+  const isLight = body.classList.toggle('light-mode');    
+  localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark');    
+} 
+
+    
+// Load stored theme (default = dark)    
+window.addEventListener("DOMContentLoaded", () => {    
+  const savedTheme = localStorage.getItem(THEME_KEY) || "light";    
+  if (savedTheme === "light") document.body.classList.add("light-mode");    
+  document.body.setAttribute("data-theme", savedTheme);    
+});    
+    
+// Add smooth transition to theme change    
+document.body.style.transition = "background 0.2s ease, color 0.2s ease";
+const getbtn = document.getElementById("getBtn")
+ if (getbtn) getbtn.addEventListener("click", () => window.location.href = "get.html");    
+    
+// ======= Pull to Refresh =======    
+
+   // script.js (ES module)
+const scrollable = document.getElementById('scrollable');
+const pullIndicator = document.getElementById('pull-indicator');
+const spinner = document.getElementById('spinner');
+const pullText = document.getElementById('pullText');
+
+/* Config */
+const maxPull = 120;     // maximum pull in px
+const threshold = 70;    // must pull this far to trigger refresh
+const refreshDuration = 1100; // fake refresh time in ms
+
+/* State */
+let startY = null;
+let pulling = false;
+let currentPull = 0;
+let isRefreshing = false;
+
+/* Utility: show/hide indicator and set translate for subtle follow */
+function updateIndicator(distance) {
+  const d = Math.max(0, Math.min(maxPull, distance));
+  currentPull = d;
+  // place indicator just above the viewport and translate it into view
+  const translateY = Math.min(d, maxPull);
+  pullIndicator.style.transform = `translateY(${translateY}px)`;
+  pullIndicator.classList.add('visible');
+
+  // feedback text and spinner rotation while dragging
+  if (d >= threshold) {
+    pullText.textContent = '';
+  } else {
+    pullText.textContent = '';
+  }
+  // rotate spinner by fraction (not full spin) while dragging
+  spinner.style.transform = `rotate(${(d / maxPull) * 360}deg)`;
+}
+
+/* Hide indicator back up */
+function hideIndicator() {
+  pullIndicator.style.transform = `translateY(0px)`;
+  pullIndicator.classList.remove('visible');
+  spinner.classList.remove('spin');
+  spinner.style.transform = '';
+  pullText.textContent = '';
+  currentPull = 0;
+}
+
+/* Do the "refresh" work (simulate network call) */
+async function doRefresh() {
+  if (isRefreshing) return;
+  isRefreshing = true;
+
+  pullText.textContent = '';
+  spinner.style.transform = '';
+  spinner.classList.add('spin');
+  pullText.textContent = '';
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  window.location.reload()
+}
+function onTouchStart(e){
+  if (isRefreshing) return;
+  if (document.scrollingElement.scrollTop !== 0) {
+    startY = null; // only start when at top
+    return;
+  }
+  const t = e.touches ? e.touches[0] : e;
+  startY = t.clientY;
+  pulling = false;
+}
+function onTouchMove(e){
+  if (startY === null) return;
+  if (isRefreshing) return;
+  const t = e.touches ? e.touches[0] : e;
+  const dy = t.clientY - startY;
+  if (dy > 0) {
+    // user is pulling down
+    e.preventDefault(); // IMPORTANT: prevent native overscroll so only our loader shows
+    pulling = true;
+    const eased = easePull(dy);
+    updateIndicator(eased);
+  } else if (dy <= 0 && pulling) {
+    // user moved back up while pulling
+    updateIndicator(0);
+  }
+}
+function onTouchEnd(e){
+  if (!pulling) {
+    startY = null;
+    return;
+  }
+  // if pulled past threshold -> refresh
+  if (currentPull >= threshold) {
+    // lock indicator visible and run refresh
+    pullIndicator.style.transform = `translateY(${60}px)`; // keep it visible
+    doRefresh();
+  } else {
+    hideIndicator();
+  }
+  startY = null;
+  pulling = false;
+}
+
+/* simple easing so pull feels natural */
+function easePull(d){
+  // soft cap after threshold
+  const r = Math.min(d, maxPull);
+  // cubic easing
+  return Math.round(r * (0.6 + 0.4 * Math.pow(r / maxPull, 0.5)));
+}
+
+/* Bind listeners: use passive: false on touchmove so we can preventDefault */
+document.addEventListener('touchstart', onTouchStart, {passive: true});
+document.addEventListener('touchmove', onTouchMove, {passive: false});
+document.addEventListener('touchend', onTouchEnd);
+
+/* Also support mouse (desktop) for testing */
+let mouseDown = false;
+document.addEventListener('mousedown', (e)=>{
+  mouseDown = true;
+  onTouchStart({touches:[e]});
+});
+document.addEventListener('mousemove', (e)=>{
+  if (!mouseDown) return;
+  onTouchMove({touches:[e], preventDefault: ()=>e.preventDefault()});
+});
+document.addEventListener('mouseup', (e)=>{
+  if (!mouseDown) return;
+  mouseDown = false;
+  onTouchEnd();
+});
+
+/* Accessibility: keyboard refresh (optional) */
+document.addEventListener('keydown', (e)=>{
+  // ctrl+r will trigger demo refresh
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r') {
+    e.preventDefault();
+    if (!isRefreshing) {
+      pullIndicator.classList.add('visible');
+      pullIndicator.style.transform = `translateY(${60}px)`;
+      doRefresh();
+    }
+  }
+});
+ 
+// ======= Navigation Buttons =======    
+const setings = document.getElementById("settings");    
+    
+settings.addEventListener("click", () => window.location.href = "setting.html");    
+const bell = document.getElementById("bellIcon");    
+const user = document.getElementById("userId");    
+    
+if (bell) bell.addEventListener("click", () => window.location.href = "notif.html");    
+const about = document.getElementById("About");    
+    
+if (about) about.addEventListener("click", () => window.location.href = "about.html");   
+if (user) user.addEventListener("click", () => window.location.href = "Profile.html"); 
+const btnen = document.querySelector("button");
+
+btnen.addEventListener("click", () => {
+  btnen.classList.add("zoom-pop");
+
+  btnen.addEventListener("animationend", () => {
+    btnen.classList.remove("zoom-pop");
+  }, { once: true });
+});
+</script>     
+<script type="module">      
+// ======= Firebase Setup =======    
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";      
+import { getAuth, onAuthStateChanged, signOut} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";      
+import { getFirestore, collection, query, where, onSnapshot, updateDoc, limit, doc, getDocs, getDoc, orderBy, setDoc, deleteDoc, addDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";      
+    
+const firebaseConfig = {      
+  apiKey: "AIzaSyA4zf2fOCRQrRBDdiE5oSd2-PVWl_bZm9Q",      
+  authDomain: "tunnelapp-c3ea8.firebaseapp.com",      
+  projectId: "tunnelapp-c3ea8",      
+  storageBucket: "tunnelapp-c3ea8.appspot.com",      
+  messagingSenderId: "242347925971",      
+  appId: "1:242347925971:web:5ad8dac436e256d574cf26",      
+  measurementId: "G-F1JVZR77NH"      
+};      
+    
+const app = initializeApp(firebaseConfig);      
+const auth = getAuth();      
+const db = getFirestore();      
+    
+// ======= Load user info =======    
+   function formatCS(value) {
+  return Number(value || 0).toLocaleString() + "cs";
+}
+
+// 1️⃣ Instant display from localStorage (formatted)
+document.getElementById("nickname").textContent = localStorage.getItem("nickname") || "User";
+document.getElementById("coin").textContent = formatCS(localStorage.getItem("coin"));
+document.getElementById("lost").textContent = formatCS(localStorage.getItem("lost"));
+document.getElementById("earned").textContent = formatCS(localStorage.getItem("earned"));
+
+// 2️⃣ Firebase auth check
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return window.location.href = "1page.html";
+
+  const userDocRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userDocRef);
+
+  if (userSnap.exists()) {
+    const data = userSnap.data();
+
+    // Update localStorage
+    localStorage.setItem("nickname", data.nickname || "User");
+    localStorage.setItem("coin", data.coin || 0);
+    localStorage.setItem("lost", data.lost || 0);
+    localStorage.setItem("earned", data.earned || 0);
+
+    // Update UI with formatted numbers
+    document.getElementById("nickname").textContent = data.nickname || "User";
+    document.getElementById("coin").textContent = formatCS(data.coin);
+    document.getElementById("lost").textContent = formatCS(data.lost);
+    document.getElementById("earned").textContent = formatCS(data.earned);
+  } else {
+    console.log("No user data found");
+  }
+}); 
+    
+// ======= Event card click (only online) =======    
+document.querySelectorAll(".event-card").forEach(card => {    
+  card.addEventListener("click",function() {    
+      const targetPage = card.getAttribute("data-page");    
+      if (targetPage) window.location.href = targetPage;    
+  });    
+});
+
+const EMOJIS = ["🔥","🚀","👏","❤️", "😎","😱"];
+let currentUserUid = null;
+
+// Track logged-in user
+onAuthStateChanged(auth, user => { 
+  if(user) currentUserUid = user.uid; 
+});
+
+// ⭐ Star rules
+function getStars(coins){
+  const rules = [
+    { empty:100, half:1000, full:5000 },
+    { empty:5000, half:7000, full:10000 },
+    { empty:10000, half:50000, full:70000 },
+    { empty:70000, half:100000, full:150000 },
+    { empty:150000, half:300000, full:500000 }
+  ];
+  let html="";
+  rules.forEach(r=>{
+    if(coins>=r.full) html+='<i class="fa-solid fa-star"></i>';
+    else if(coins>=r.half) html+='<i class="fa-solid fa-star-half-stroke"></i>';
+    else html+='<i class="fa-regular fa-star"></i>';
+  });
+  return html;
+}
+
+// Placeholder
+function createPlaceholder(){
+  const div = document.createElement("div");
+  div.className = "placeholder";
+  div.innerHTML = `<i class="fa-solid fa-user"></i>`;
+  return div;
+}
+
+// Nickname helpers
+function shortenNickname(nick,maxLength=12){
+  if(!nick) return "Anonymous";
+  return nick.length>maxLength ? nick.slice(0,maxLength)+"…" : nick;
+}
+
+function adjustNicknameFont(span,maxWidth=100,minFont=10){
+  let size=parseInt(window.getComputedStyle(span).fontSize);
+  while(span.offsetWidth>maxWidth && size>minFont){
+    size--;
+    span.style.fontSize=size+"px";
+  }
+}
+
+// Short number formatter for counts
+function formatCount(n){
+  if(n<1000) return n.toString();
+  if(n<1_000_000) return (n/1000).toFixed(1).replace(/\.0$/,'')+"k";
+  return (n/1_000_000).toFixed(1).replace(/\.0$/,'')+"M";
+}
+
+// Leaderboard
+const q = query(collection(db,"users"),orderBy("coin","desc"),limit(10));
+onSnapshot(q, snapshot=>{
+  const board=document.getElementById("leaderboard");
+  board.innerHTML="";
+
+  snapshot.docs.forEach(docSnap=>{
+    const data = docSnap.data();
+    const uid = docSnap.id;
+
+    // Profile element
+    let profileElement;
+    if(data.photoURL && data.photoURL.trim()!==""){
+      const img=document.createElement("img");
+      img.src=data.photoURL;
+      img.alt="Profile";
+      img.onerror = ()=> img.replaceWith(createPlaceholder());
+      profileElement = img;
+    } else profileElement = createPlaceholder();
+
+    // User card
+    const div = document.createElement("div");
+    div.className="user-card";
+    div.innerHTML = `<div class="profile"><span></span></div>
+                     <div class="stars">${getStars(data.coin||0)}</div>`;
+    div.querySelector(".profile span").textContent = shortenNickname(data.nickname,12);
+    adjustNicknameFont(div.querySelector(".profile span"));
+    div.querySelector(".profile").prepend(profileElement);
+
+    // Click profile → profile.html
+    div.querySelector(".profile").addEventListener("click",()=>{
+      window.location.href=`Profile.html?uid=${uid}`;
+    });
+
+    // Reactions container
+    const reactBox = document.createElement("div");
+    reactBox.className="reactions";
+
+    // Listen to reactions subcollection
+    const reactsRef = collection(db, "users", uid, "reactions");
+    onSnapshot(reactsRef, snap=>{
+      const counts = {};
+      snap.forEach(rDoc=>{
+        const rData = rDoc.data();
+        if(rData.emoji) counts[rData.emoji] = (counts[rData.emoji]||0)+1;
+      });
+
+      if(Object.keys(counts).length===0){
+        if(reactBox.parentNode) reactBox.remove();
+        return;
+      }
+
+      if(!reactBox.parentNode) div.appendChild(reactBox);
+      reactBox.innerHTML="";
+      Object.entries(counts).slice(0,4).forEach(([emoji,count])=>{
+        const span = document.createElement("span");
+        span.textContent = count>1 ? emoji + formatCount(count) : emoji;
+        reactBox.appendChild(span);
+      });
+    });
+
+    // Emoji picker (long press)
+    let pressTimer;
+    function showPicker(){
+      document.querySelectorAll(".emoji-picker").forEach(p=>p.remove());
+      const picker = document.createElement("div");
+      picker.className="emoji-picker";
+
+      EMOJIS.forEach(emoji=>{
+        const btn = document.createElement("button");
+        btn.textContent = emoji;
+        btn.className="emoji-btn";
+        btn.onclick = async e=>{
+          e.stopPropagation();
+          if(!currentUserUid) return;
+
+          const reactRef = doc(db,"users",uid,"reactions",currentUserUid);
+          const snap = await getDoc(reactRef);
+          const existingEmoji = snap.exists() ? snap.data().emoji : null;
+
+          if(existingEmoji === emoji) await deleteDoc(reactRef);
+          else await setDoc(reactRef,{ emoji });
+
+          picker.remove();
+        };
+        picker.appendChild(btn);
+      });
+
+      div.appendChild(picker);
+      setTimeout(()=>{
+        function close(e){ 
+          if(!picker.contains(e.target)){
+            picker.remove();
+            document.removeEventListener("click",close);
+          } 
+        }
+        document.addEventListener("click",close);
+      },0);
+    }
+
+    div.addEventListener("mousedown",()=> pressTimer=setTimeout(showPicker,600));
+    div.addEventListener("mouseup",()=>clearTimeout(pressTimer));
+    div.addEventListener("mouseleave",()=>clearTimeout(pressTimer));
+    div.addEventListener("touchstart",()=> pressTimer=setTimeout(showPicker,600));
+    div.addEventListener("touchend",()=>clearTimeout(pressTimer));
+
+    board.appendChild(div);
+  });
+});
+
+let latestUnread = []; // unread notifications
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) return;
+
+  const indicator = document.getElementById("notifIndicator");
+  const notifContainer = document.getElementById("notifContainer");
+  const bell = document.getElementById("notifBell");
+
+  // Get seen notification IDs from localStorage
+  let seenNotifications = JSON.parse(localStorage.getItem("seenNotifications") || "[]");
+
+  // Firestore query: unread notifications
+  const q = query(
+    collection(db, "notifications"),
+    where("userId", "==", user.uid),
+    where("read", "==", false)
+  );
+
+  onSnapshot(q, (snap) => {
+    latestUnread = [];
+
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
+      const id = docSnap.id;
+      if (!seenNotifications.includes(id)) {
+        latestUnread.push({ id, data });
+      }
+    });
+
+    if (indicator) {
+      indicator.style.display = latestUnread.length > 0 ? "inline-block" : "none";
+      indicator.textContent = latestUnread.length;
+    }
+  });
+
+  if (bell) {
+    bell.addEventListener("click", async () => {
+      if (notifContainer) {
+        notifContainer.innerHTML = "";
+        latestUnread.forEach(n => {
+          const div = document.createElement("div");
+          div.className = "notification-item";
+          div.textContent = n.data.message || "No message";
+          notifContainer.appendChild(div);
+        });
+      }
+
+      // Hide indicator permanently until new notifications
+      if (indicator) indicator.style.display = "none";
+
+      // Update Firestore: mark notifications as read
+      try {
+        await Promise.all(latestUnread.map(n => {
+          const notifRef = doc(db, "notifications", n.id);
+          return notifRef.update({ read: true });
+        }));
+      } catch (err) {
+        console.error("Failed to mark notifications read:", err);
+      }
+
+      // Update localStorage with IDs of seen notifications
+      latestUnread.forEach(n => {
+        if (!seenNotifications.includes(n.id)) seenNotifications.push(n.id);
+      });
+      localStorage.setItem("seenNotifications", JSON.stringify(seenNotifications));
+
+      latestUnread = [];
+    });
+  }
+});
+
+// Elements
+const logoutBtn = document.getElementById("logoutBtn");
+const logoutModal = document.getElementById("logoutModal");
+const cancelLogout = document.getElementById("cancelLogout");
+const confirmLogout = document.getElementById("confirmLogout");
+
+// Open modal
+logoutBtn.addEventListener("click", () => {
+  logoutModal.style.display = "flex";
+  setTimeout(() => logoutModal.classList.add("show"), 10);
+});
+
+// Close modal
+cancelLogout.addEventListener("click", () => {
+  logoutModal.classList.remove("show");
+  setTimeout(() => (logoutModal.style.display = "none"), 300);
+});
+
+// Confirm logout
+confirmLogout.addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    window.location.href = "1page.html"; // redirect to login
+  } catch (err) {
+    console.error("Logout failed:", err);
+  }
+});
+
+// Close when clicking outside modal
+window.addEventListener("click", (e) => {
+  if (e.target === logoutModal) {
+    logoutModal.classList.remove("show");
+    setTimeout(() => (logoutModal.style.display = "none"), 300);
+  }
+});
+
+
+const lostSpan = document.getElementById("lost");
+const earnedSpan = document.getElementById("earned");
+const lostSelect = document.getElementById("lostSelect");
+const earnedSelect = document.getElementById("earnedSelect");
+
+const modal = document.getElementById("csModal");
+const modalTitle = document.getElementById("modalTitle");
+const modalBody = document.getElementById("modalBody");
+const okBtn = document.getElementById("okBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+
+let currentAction = null;
+let userRef = null;
+
+function showModal(title, message, showCancel = true) {
+  modalTitle.textContent = title;
+  modalBody.textContent = message;
+  modal.classList.add("show");
+  cancelBtn.style.display = showCancel ? "inline-block" : "none";
+}
+
+function hideModal() { modal.classList.remove("show"); currentAction = null; }
+
+onAuthStateChanged(auth, async user => {
+  if(!user) return window.location.href="1page.html";
+  userRef = doc(db,"users",user.uid);
+  const snap = await getDoc(userRef);
+  if(snap.exists()){
+    const data = snap.data();
+    lostSpan.textContent = ((data.lost || 0).toLocaleString()) + "cs";
+    earnedSpan.textContent = ((data.earned || 0).toLocaleString()) + "cs";
+  }
+});
+
+// Lost select actions
+lostSelect.addEventListener("change", async () => {
+  if(!userRef) return;
+  const snap = await getDoc(userRef);
+  const data = snap.data() || {};
+  if(lostSelect.value === "clearLost"){
+    currentAction = "clearLost";
+    showModal("Confirm", "Clearing lost coins won't delete lost coins, proceed?");
+} else if(lostSelect.value === "viewLost"){
+  // Total including current
+  const totalLost = (data.totalLost || 0) + (data.lost || 0);
+  showModal("Total Lost Coins", totalLost.toLocaleString() + "cs", false);
+}
+  lostSelect.value = "";
+});
+
+// Earned select actions
+earnedSelect.addEventListener("change", async () => {
+  if(!userRef) return;
+  const snap = await getDoc(userRef);
+  const data = snap.data() || {};
+  if(earnedSelect.value === "clearEarned"){
+    currentAction = "clearEarned";
+    showModal("Confirm", "Are you sure you want to clear current earned coins?");
+} else if(earnedSelect.value === "viewEarned"){
+  // Total including current
+  const totalEarned = (data.totalEarned || 0) + (data.earned || 0);
+  showModal("Total Earned Coins", totalEarned.toLocaleString() + "cs", false);
+}
+  earnedSelect.value = "";
+});
+
+// OK button for clearing coins
+okBtn.addEventListener("click", async () => {
+  if(!currentAction || !userRef) return hideModal();
+
+  const snap = await getDoc(userRef);
+
+  if(currentAction === "clearLost"){
+    const lostAmount = snap.data().lost||0;
+    await updateDoc(userRef, { lost:0, totalLost: increment(lostAmount) });
+    lostSpan.textContent = "0cs";
+  } else if(currentAction === "clearEarned"){
+    const earnedAmount = snap.data().earned||0;
+    await updateDoc(userRef, { earned:0, totalEarned: increment(earnedAmount) });
+    earnedSpan.textContent = "0cs";
+  }
+  hideModal();
+});
+
+// Cancel button
+cancelBtn.addEventListener("click", hideModal);
+
+// ====== Push Notifications ======
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging.js";
+
+const messaging = getMessaging(app);
+
+// Register service worker
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("firebase-messaging-sw.js")
+    .then((registration) => {
+      console.log("✅ Service Worker registered:", registration);
+    })
+    .catch((err) => console.error("❌ SW registration failed:", err));
+}
+
+// Ask permission + get token
+async function requestPermission() {
+  const permission = await Notification.requestPermission();
+  if (permission === "granted") {
+    const token = await getToken(messaging, {
+      vapidKey: "BEtdipsWWIezmcL4AzjpPVWsC1tToixSHazNGSKNdwhWIjS4NDIkrU6dJ0JojxIqIUV1eamd3OnGPgyPiMiOpBc"
+// from Firebase console
+    });
+    console.log("🎯 FCM Token:", token);
+  } else {
+    console.log("🚫 Notifications blocked by user");
+  }
+}
+
+requestPermission();
+
+// Foreground message handler
+onMessage(messaging, (payload) => {
+  console.log("💬 Foreground message:", payload);
+  alert(`${payload.notification.title}: ${payload.notification.body}`);
+});
+</script>
+</html>

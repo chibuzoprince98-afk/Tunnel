@@ -1,0 +1,495 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
+  <title>Signup</title>
+  
+  
+  <style>  
+  body {
+      background: linear-gradient(185deg, #000 10%, #001f1c);
+      height: 100vh;
+    padding: 20px;
+  }
+  .criteria {
+display: none;
+font-size: 8px;
+color: red;
+margin-bottom: 0px;
+}
+.criteria.show {
+display: block;
+}
+.criteria label {
+display: flex;
+align-items: center;
+gap: 6px;
+}
+input[type="checkbox"] {
+accent-color: #00ffcc;
+}
+.hidden {
+display: none;
+}
+
+h1 {
+color: #00ffcc;
+text-align: center;
+position: relative;
+top: -40px;
+}
+h2 {
+color: #00ffcc;
+text-align: left;
+font-size: 25px;
+position: relative;
+top: 90px;
+}
+.light-mode a {
+  color: #00d998;
+  }
+  .light-mode #privacy-label {
+    color: black;
+  }
+     .light-mode button{
+     background: #00d998;
+     color: white;
+   }
+    .light-mode h1{ color: #00d998;}
+    .light-mode h2 {
+      color: #00d998;
+    }
+        .light-mode form input[type="email"],
+    .light-mode form input[type="password"],
+    .light-mode input[type="text"]
+    {border: 1px solid #00d998;
+      background: #f0f0f0;
+      color: black;
+    }
+    .light-mode input::placeholder {
+      color: black;
+    }
+    .light-mode Form {
+  background: #f0f0f0;
+  border: none;
+  box-shadow: 0 5px 5px rgba(0,0,0,0.4);
+  border-top: 1px solid white;
+}
+.light-mode {
+  background: #f0f0f0;
+}
+form {  
+  width: 92%;  
+  background: #1f1f1f;  
+  padding: 32px; 
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-radius: 10px;  
+  box-shadow: 0 0 8px #00ffcccc;
+  display: flex;  
+  flex-direction: column;  
+  gap: 15px;  
+  right: 20px;  
+  position: relative;  
+  top: 90px;  
+}  
+  
+
+input {  
+  padding: 10px;
+  font-size: 12px;  
+  border: 1px solid #00ffcc;  
+  border-radius: 6px;  
+  outline: none;  
+  
+}  
+input::placeholder {  
+  opacity: 0.5;  
+  font-style: italic;
+  color: #00ffcc;  
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+background-color: #1f1f1f;
+color: white;
+}
+
+button {  
+  background: #00ffcc;  
+  color: #000;  
+  font-size: 16px;  
+  padding: 12px;  
+  border: none;  
+  border-radius: 6px;  
+  cursor: pointer;  
+  position: relative;  
+}  
+ .light-mode .loader {
+   border-top: 2px solid #00d998;
+ }
+.loader {  
+  display: none;  
+  width: 16px;  
+  height: 16px;  
+  border: 2px solid white;  
+  border-top: 2px solid #00ffcc;  
+  border-radius: 50%;  
+  animation: spin 1s linear infinite;  
+  margin-right: 8px;  
+  vertical-align: middle;  
+}  
+
+.loading .loader {  
+  display: inline-block;  
+}  
+
+@keyframes spin {  
+  0% { transform: rotate(0deg);}  
+  100% { transform: rotate(360deg);}  
+}  
+
+.error-message {  
+  font-size: 10px;  
+  color: red;  
+  margin-top: -10px;  
+  margin-bottom: -10px;  
+}  
+
+#privacy-label {  
+  align-items: center;  
+  font-size: 11px;  
+  color: white;  
+}  
+a {  
+  text-decoration: none;  
+  color: #00ffcc;  
+}  
+
+.vibrate {  
+  animation: vibrate 0.3s linear 2;  
+}  
+
+@keyframes vibrate {  
+  0% { transform: translateX(0px); }  
+  25% { transform: translateX(-3px); }  
+  50% { transform: translateX(3px); }  
+  75% { transform: translateX(-2px); }  
+  100% { transform: translateX(0px); }  
+}  
+          #notification {  
+    position: fixed;  
+    top: 5px;  
+    left: 50%;  
+    transform: translateX(-50%);  
+    width: 70%;  
+    padding: 12px 20px;  
+    border-radius: 8px;  
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);  
+    font-size: 10px;  
+    display: flex;  
+    align-items: center;  
+    justify-content: space-between;  
+    z-index: 10000;  
+    display: none;  
+  }  
+  #notification.error {  
+    background-color: #ff4d4f;  
+    color: white;  
+  }  
+  #notification.success {  
+    background-color: #4caf50;  
+    color: white;  
+  }  
+  #notification button {  
+    background: transparent;  
+    border: none;  
+    color: white;  
+    font-size: 18px;  
+    padding: 0 5px 0 15px;  
+    line-height: 1;  
+  }  
+  @keyframes slideDown {  
+    from {  
+      transform: translateY(-100%) translateX(-50%);  
+      opacity: 0;  
+    }  
+    to {  
+      transform: translateY(0) translateX(-50%);  
+      opacity: 1;  
+    }  
+  }  
+  @keyframes slideUp {  
+    from {  
+      transform: translateY(0) translateX(-50%);  
+      opacity: 1;  
+    }  
+    to {  
+      transform: translateY(-100%) translateX(-50%);  
+      opacity: 0;  
+    }  
+  }  
+  #notification.slide-in {  
+    animation: slideDown 0.4s forwards;  
+  }  
+  #notification.slide-out {  
+    animation: slideUp 0.4s forwards;  
+  }
+</style>
+
+</head>  
+<body>  
+      <div id="notification" role="alert" aria-live="assertive">  
+    <span id="notificationMessage"></span>  
+    <button id="notificationClose" aria-label="Close notification">&times;</button>  
+  </div>
+  <h1>Tunnel</h1>  <h2>Sign Up </h2>  <form id="signupForm">  
+  <input type="text" id="fullname" placeholder="Full Name" required />  
+  <input type="text" id="nickname" placeholder="Nickname" required />  
+  <input type="email" id="email" placeholder="Email" required />  
+  <input type="password" id="password" placeholder="Password" autocomplete="off" />     <div class="password-container">  
+  <div id="password-criteria" class="criteria hidden">  
+    <label><input type="checkbox" id="length" disabled /> min. 8 characters</label>  
+    <label><input type="checkbox" id="uppercase" disabled /> 1 uppercase letter</label>  
+    <label><input type="checkbox" id="symbol" disabled /> 1 symbol</label>  
+    <label><input type="checkbox" id="number" disabled /> 1 number</label>  
+  </div>  </div>    <p id="message" class="error-message"></p>    <label id="privacy-label">  
+    <input type="checkbox" id="privacy" />  
+    I agree to the <a href="#">Privacy Policy</a> & <a href="#">Terms</a>  
+  </label>    
+  <button type="submit" id="signupBtn">  
+    <span class="loader" id="loader"></span>  
+    Sign Up  
+  </button>  
+</form>  
+<p id="status" class="success"></p> 
+
+<script>
+   const THEME_KEY = "theme";
+
+// Apply theme when page loads
+function applyTheme(theme) {
+if (theme === "light") {
+document.body.classList.add("light-mode");
+document.body.setAttribute("data-theme", "light");
+} else {
+document.body.classList.remove("light-mode");
+document.body.setAttribute("data-theme", "dark");
+}
+}
+
+
+
+// Load stored theme (default = dark)
+window.addEventListener("DOMContentLoaded", () => {
+const savedTheme = localStorage.getItem(THEME_KEY) || "dark";
+applyTheme(savedTheme);
+});
+
+</script>
+<script type="module">  
+    
+  const passwordInput = document.getElementById("password");  
+const criteriaBox = document.getElementById("password-criteria");  
+const strengthMsg = document.getElementById("strength-msg");  
+  
+const checkLength = document.getElementById("length");  
+const checkUpper = document.getElementById("uppercase");  
+const checkSymbol = document.getElementById("symbol");  
+const checkNumber = document.getElementById("number");  
+  
+passwordInput.addEventListener("input", () => {  
+  const val = passwordInput.value;  
+  
+  if (val.length > 0) {  
+    criteriaBox.classList.add("show");  
+  } else {  
+    criteriaBox.classList.remove("show");  
+  }  
+  
+  checkLength.checked = val.length >= 8;  
+  checkUpper.checked = /[A-Z]/.test(val);  
+  checkSymbol.checked = /[^a-zA-Z0-9]/.test(val);  
+  checkNumber.checked = /\d/.test(val);  
+  
+  const allValid = checkLength.checked && checkUpper.checked && checkSymbol.checked && checkNumber.checked;  
+  strengthMsg.classList.toggle("hidden", allValid);  
+});  
+  
+passwordInput.addEventListener("blur", () => {  
+  criteriaBox.classList.remove("show");  
+});  
+    
+    
+    
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";  
+  import {  
+  getFirestore,  
+  doc,  
+  setDoc  
+ } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";  
+  import {  
+    getAuth,  
+    createUserWithEmailAndPassword,  
+    sendEmailVerification,
+    reload,  
+    signOut  
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";  
+  
+  // Firebase config  
+  const firebaseConfig = {  
+    apiKey: "AIzaSyA4zf2fOCRQrRBDdiE5oSd2-PVWl_bZm9Q",  
+    authDomain: "tunnelapp-c3ea8.firebaseapp.com",  
+    projectId: "tunnelapp-c3ea8",  
+    storageBucket: "tunnelapp-c3ea8.appspot.com",  
+    messagingSenderId: "242347925971",  
+    appId: "1:242347925971:web:5ad8dac436e256d574cf26",  
+    measurementId: "G-F1JVZR77NH"  
+  };  
+  
+  const app = initializeApp(firebaseConfig);  
+  const auth = getAuth(app);  
+  const db = getFirestore(app);  
+  
+  // Elements  
+  const form = document.getElementById("signupForm");  
+  const loader = document.getElementById("loader");  
+  const message = document.getElementById("message");  
+  const signupBtn = document.getElementById("signupBtn");  
+  const privacy = document.getElementById("privacy");  
+  const privacyLabel = document.getElementById("privacy-label");  
+  const status = document.getElementById("status");  
+  
+  let privacyClickCount = 0;  
+  
+  function showLoader(show) {  
+    if (show) {  
+      signupBtn.classList.add("loading");  
+    } else {  
+      signupBtn.classList.remove("loading");  
+    }  
+  }  
+  
+  function validatePassword(password) {  
+    const rules = {  
+      length: password.length >= 8,  
+      uppercase: /[A-Z]/.test(password),  
+      number: /[0-9]/.test(password),  
+      symbol: /[!@#\$%\^\&*\)\(+=._-]/.test(password)  
+    };  
+    return rules;  
+  }  
+  
+  form.addEventListener("submit", async (e) => {  
+    e.preventDefault();  
+  
+    message.textContent = "";  
+    status.textContent = "";  
+  
+    const fullName = document.getElementById("fullname").value.trim();  
+    const nickname = document.getElementById("nickname").value.trim();  
+    const email = document.getElementById("email").value.trim();  
+    const password = document.getElementById("password").value;  
+  
+    // Check privacy  
+    if (!privacy.checked) {  
+      privacyClickCount++;  
+      privacyLabel.classList.add("vibrate");  
+      setTimeout(() => privacyLabel.classList.remove("vibrate"), 500);  
+      if (privacyClickCount >= 2) {  
+        message.textContent = "Please accept the privacy terms.";  
+      }  
+      return;  
+    }  
+  
+    // Password validation  
+    const rules = validatePassword(password);  
+    const failed = Object.entries(rules).filter(([_, valid]) => !valid).map(([rule]) => rule);  
+    if (failed.length > 0) {  
+      message.textContent = `Password not strong. Missing: ${failed.join(', ')}`;  
+      return;  
+    }  
+      
+    localStorage.setItem("nickname", nickname);  
+    localStorage.setItem("fullname", fullname);  
+      
+    // Start loader  
+    showLoader(true);  
+  
+    try {  
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);  
+      
+      
+      
+      await sendEmailVerification(userCred.user);  
+      
+      await setDoc(doc(db, "users", userCred.user.uid), {  
+  email: email,  
+  nickname: nickname,  
+  fullname: fullName,  
+  coin: 10,  
+  lost: 0,  
+  earned: 0,  
+  joinedAt: new Date()  
+});  
+      status.textContent = "Verification email sent. Please check your inbox.";  
+      message.textContent = "";  
+      showLoader(false);  
+  
+  
+      // Sign user out to wait for verification  
+      await signOut(auth);  
+  
+
+    } catch (err) {  
+      showLoader(false);
+        let errorMsg; // ✅ use a normal variable name
+  switch (err.code) {
+          case "auth/network-request-failed":
+    errorMsg = "Check your internet and try again.";}
+    showNotification(errorMsg, "error"); 
+        message.textContent = ("Error: " + err.message);  
+    }  
+  }); 
+  
+      const notification = document.getElementById('notification');
+const notificationMessage = document.getElementById('notificationMessage');
+const notificationClose = document.getElementById('notificationClose');
+
+let notificationTimeout;
+function showNotification(msg, type = 'error') {
+  clearTimeout(notificationTimeout);
+  notification.className = '';
+  notificationMessage.textContent = msg;
+  notification.classList.add(type, 'slide-in');
+  notification.style.display = 'flex';
+  notificationTimeout = setTimeout(() => {
+    notification.classList.remove('slide-in');
+    notification.classList.add('slide-out');
+  }, 3850);
+}
+
+notification.addEventListener('animationend', (e) => {
+  if (e.animationName === 'slideUp') {
+    notification.style.display = 'none';
+    notification.className = '';
+    notificationMessage.textContent = '';
+  }
+});
+notificationClose.addEventListener('click', () => {
+  notification.style.display = 'none';
+  notificationMessage.textContent = '';
+});
+
+window.addEventListener("offline", () => {
+  showNotification("You are offline, please reconnect", "error");
+});
+window.addEventListener("online", () => {
+  showNotification("Back online", "success");
+});
+</script>  
+</body>  
+</html> 
+
