@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Signup/Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+</body>
+<h1>Tunnel</h1>
+<div class="content" style=" color: red;">
+  Signup now
+</div>
+<div class="buttons">
+  <button class="btn" id="signupBtn">sign up</button>
+  <button class="btn" id="loginBtn">Login</button>
+</div>
+        <div id="statusBar" class="status-bar">Checking connection...</div>
+<style>
+      body {
+      font-family: sans-serif;
+      background: linear-gradient(185deg, #000 10%, #001f1c);
+      height: 100vh;
+      padding: 20px;
+      overflow: hidden;
+      align-items: center;
+    }
+    h1 {
+      color: #00ffcc;
+      font-size: 45px;
+      bottom: 40px;
+      position: relative;
+      text-align: center;
+      text-shadow: 0 0 12px rgba(0,255,204,0.8);
+    }
+     .buttons {
+      position: relative;
+      top: 330px;
+      left: 7px;
+      text-align: center;
+      display: flex;
+      gap: 40px;
+    }
+        .btn {
+          text-align: center;
+      background: #00ffcc;
+      color: #000;
+      text-decoration: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-weight: bold;
+      font-size: 16px;
+      position: relative;
+      transition: 0.3s;
+      overflow: hidden;
+      min-width: 120px;
+      cursor: none;
+    }
+    .btn:hover {
+      background-color: #00ffcccc;
+      opacity: 0.8;
+    }
+        /* Online/offline notification */
+    .status-bar {
+      position: relative;
+      top: 30px; left: 70px;
+      width: 50%;
+      padding: 8px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      background: #00ffcc;
+      color: #000;
+      transform: translateY(170%);
+      transition: transform 0.4s ease;
+      z-index: 100;
+    }
+    .status-bar.show {
+      transform: translateY(0);
+    }
+    .status-bar.offline {
+      background: #ff4444;
+      color: #fff;
+    }
+</style>
+<script>
+  // Connection status notification
+  const statusBar = document.getElementById("statusBar");
+  let wasOffline = false; // track state
+
+  function showStatus(message, isOffline = false) {
+    statusBar.textContent = message;
+    statusBar.className = "status-bar show" + (isOffline ? " offline" : "");
+    setTimeout(() => statusBar.classList.remove("show"), 2000);
+  }
+
+  function updateStatus() {
+    if (!navigator.onLine) {
+      wasOffline = true;
+      showStatus("You are Offline", true);
+    } else if (wasOffline) {
+      // only show online if previously offline
+      wasOffline = false;
+      showStatus("Back online", false);
+    }
+  }
+
+  window.addEventListener("online", updateStatus);
+  window.addEventListener("offline", updateStatus);
+
+  // Button loader + redirect
+  function handleButton(btn, url) {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (!navigator.onLine) {
+        showStatus("You are Offline", true);
+        return;
+      }
+      btn.classList.add("loading");
+      setTimeout(() => {
+        window.location.href = url; // real navigation
+      }, 5700); // delay to show loader
+    });
+  }
+
+  const signupBtn = document.getElementById("signupBtn");
+     signupBtn.addEventListener("click", () => window.location.href = "signup.html");    
+  const loginBtn = document.getElementById("loginBtn");
+   loginBtn.addEventListener("click", () => window.location.href = "login.html");    
+</script>
+</body>
+</html>
