@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>login</title>
+  </head>  
+  <style>  
+    body {
+      margin: auto;
+      background: linear-gradient(185deg, #000 -20%, #001f1c);  
+      height: 100vh;
+      padding: 20px;  
+    }  
+    h1 {  
+      color: #00ffcc;  
+      text-align: center;  
+      position: relative;  
+      top: -40px;  
+    }  
+      
+    h2 { 
+      text-align: center;
+      color: #00ffcc; 
+      right: 50px;
+      position: relative;  
+      top: 70px;  
+    }  
+  
+    form {  
+      margin: 30px auto;
+      position: relative; 
+      background: #1f1f1f;  
+      padding: 42px;  
+      right: 5px;  
+      border-radius: 10px;  
+      box-shadow: 0 0 8px #00ffcc;  
+      width: 250px;  
+      top: 90px;
+      overflow: hidden;
+    }  
+    .light-mode form input[type="email"],  
+    .light-mode form input[type="password"]  
+    {border: 1px solid #00d998;  
+      background: #f0f0f0;  
+      color: black;  
+    }  
+    .light-mode input::placeholder {  
+      color: black;  
+    }  
+      
+     form input[type="email"],  
+    form input[type="password"] {  
+      width: 250px;  
+      padding: 14px;  
+      margin: 10px 0;  
+      border: 1px solid #00ffcc;  
+      outline: none;  
+      border-radius: 8px;  
+      font-size: 12px;  
+      align-items: center;  
+      background: #1f1f1f;  
+      margin-left: -12px;  
+      color: white;  
+    }  
+      
+    input::placeholder {  
+      font-style: italic;  
+      opacity: 0.5;  
+      color: #00ffcc;  
+    }  
+    #loginBtn  
+      {  
+      background: #00ffcc;  
+      color: #000;  
+      font-size: 16px;  
+      padding: 12px;  
+      border: none;  
+      border-radius: 6px;  
+      cursor: pointer;  
+      position: relative;  
+      width: 280px;  
+      left: -13px;  
+    }  
+   .light-mode #loginBtn{  
+     background: #00d998;  
+     color: white;  
+   }  
+   .light-mode .forgot {  
+     color: black;  
+   }  
+   .light-mode .forgot a {  
+     color: #00d998;  
+   }  
+     
+   .light-mode .loader {  
+     border-top: 2px solid #00d998;  
+   }  
+       .light-mode h1{ color: #00d998;}  
+    .light-mode h2 {  
+      color: #00d998;  
+    }  
+    .loader {  
+      display: none;  
+      width: 16px;  
+      height: 16px;  
+      border: 2px solid white;  
+      border-top: 2px solid #00ffcc;  
+      border-radius: 50px;  
+      animation: spin 1s linear infinite;  
+      margin-right: 8px;  
+      vertical-align: middle;  
+    }  
+    .loading .loader {  
+      display: inline-block;  
+    }  
+    @keyframes spin {  
+      0% { transform: rotate(0deg);}  
+      100% { transform: rotate(360deg);}  
+    }  
+  
+    body.light-mode {  
+  background: #f0f0f0;  
+}  
+.light-mode Form {  
+  background: #f0f0f0;  
+  border: none;  
+  box-shadow: 0 5px 5px rgba(0,0,0,0.4);  
+  border-top: 1px solid white;  
+}  
+    .forgot {  
+      text-align: center;  
+      font-size: 12px;  
+      color: white;  
+    }  
+    .forgot a {  
+      color: #00ffcc;  
+      text-decoration: none;  
+    }  
+      
+          #notification {  
+    position: fixed;  
+    top: 5px;  
+    left: 50%;  
+    transform: translateX(-50%);  
+    width: 70%;  
+    padding: 12px 20px;  
+    border-radius: 8px;  
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);  
+    font-size: 10px;  
+    display: flex;  
+    align-items: center;  
+    justify-content: space-between;  
+    z-index: 10000;  
+    display: none;  
+  }  
+  #notification.error {  
+    background-color: #ff4d4f;  
+    color: white;  
+  }  
+  #notification.success {  
+    background-color: #4caf50;  
+    color: white;  
+  }  
+  #notification button {  
+    background: transparent;  
+    border: none;  
+    color: white;  
+    font-size: 18px;  
+    padding: 0 5px 0 15px;  
+    line-height: 1;  
+  }  
+  @keyframes slideDown {  
+    from {  
+      transform: translateY(-100%) translateX(-50%);  
+      opacity: 0;  
+    }  
+    to {  
+      transform: translateY(0) translateX(-50%);  
+      opacity: 1;  
+    }  
+  }  
+  @keyframes slideUp {  
+    from {  
+      transform: translateY(0) translateX(-50%);  
+      opacity: 1;  
+    }  
+    to {  
+      transform: translateY(-100%) translateX(-50%);  
+      opacity: 0;  
+    }  
+  }  
+  #notification.slide-in {  
+    animation: slideDown 0.4s forwards;  
+  }  
+  #notification.slide-out {  
+    animation: slideUp 0.4s forwards;  
+  }  
+  
+  </style>
+<body>  
+      <div id="notification" role="alert" aria-live="assertive">  
+    <span id="notificationMessage"></span>  
+    <button id="notificationClose" aria-label="Close notification">&times;</button>  
+  </div>
+  <h1>Tunnel</h1>   
+  <h2>welcome back!</h2>    <form id="loginForm">  
+    <input type="email" id="email" placeholder="Email" required />  
+    <input type="password" id="password" placeholder="Password" required />  
+    <p class="forgot">Forgot password? <a href="reset.html">Reset</a></p>  
+     <button type="submit" id="loginBtn">  
+      <span class="loader" id="loader"></span>  
+      Login  
+    </button>  
+  </form> 
+  
+<script>
+        const THEME_KEY = "theme";
+
+// Apply theme when page loads
+function applyTheme(theme) {
+if (theme === "light") {
+document.body.classList.add("light-mode");
+document.body.setAttribute("data-theme", "light");
+} else {
+document.body.classList.remove("light-mode");
+document.body.setAttribute("data-theme", "dark");
+}
+}
+
+
+
+// Load stored theme (default = dark)
+window.addEventListener("DOMContentLoaded", () => {
+const savedTheme = localStorage.getItem(THEME_KEY) || "dark";
+applyTheme(savedTheme);
+});
+</script>
+  <script type="module">  
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";  
+    import {  
+      getAuth,  
+      signInWithEmailAndPassword  
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";  
+  
+    const firebaseConfig = {  
+      apiKey: "AIzaSyA4zf2fOCRQrRBDdiE5oSd2-PVWl_bZm9Q",  
+      authDomain: "tunnelapp-c3ea8.firebaseapp.com",  
+      projectId: "tunnelapp-c3ea8",  
+      storageBucket: "tunnelapp-c3ea8.appspot.com",  
+      messagingSenderId: "242347925971",  
+      appId: "1:242347925971:web:5ad8dac436e256d574cf26",  
+      measurementId: "G-F1JVZR77NH"  
+    };  
+  
+    const app = initializeApp(firebaseConfig);  
+    const auth = getAuth(app);  
+  
+    const form = document.getElementById("loginForm");  
+    const emailInput = document.getElementById("email");  
+    const passwordInput = document.getElementById("password");  
+    const loader = document.getElementById("loader");  
+    const loginBtn = document.getElementById("loginBtn");  
+  
+    function showLoader(show) {  
+      if (show) {  
+        loginBtn.classList.add("loading");  
+      } else {  
+        loginBtn.classList.remove("loading");  
+      }  
+    }  
+  function getFriendlyError(code) {
+  switch (code) {
+    case "auth/invalid-email":
+      return "Invalid email address.";
+    case "auth/user-not-found":
+      return "No account found with that email.";
+    case "auth/wrong-password":
+      return "Incorrect password. Try again.";
+    case "auth/network-request-failed":
+      return "Network error. Check your connection.";
+    default:
+      return "Login failed. Please try again.";
+  }
+}
+form.addEventListener("submit", async (e) => {  
+  e.preventDefault();  
+
+  const email = emailInput.value.trim();  
+  const password = passwordInput.value;  
+
+  showLoader(true);  
+
+  try {  
+    const userCred = await signInWithEmailAndPassword(auth, email, password);  
+
+    if (!userCred.user.emailVerified) {  
+      showNotification("Please verify your email before logging in.", "error");  
+      showLoader(false);  
+      return;  
+    }  
+
+    showNotification("Login successful! Redirecting...", "success");  
+    showLoader(false);  
+    setTimeout(() => window.location.href = "main.html", 1500);  
+
+  } catch (err) {  
+    showLoader(false);  
+    showNotification(getFriendlyError(err.code), "error");  
+  }  
+});
+      
+    const notification = document.getElementById('notification');  
+const notificationMessage = document.getElementById('notificationMessage');  
+const notificationClose = document.getElementById('notificationClose');  
+  
+let notificationTimeout;  
+function showNotification(msg, type = 'error') {  
+  clearTimeout(notificationTimeout);  
+  notification.className = '';  
+  notificationMessage.textContent = msg;  
+  notification.classList.add(type, 'slide-in');  
+  notification.style.display = 'flex';  
+  notificationTimeout = setTimeout(() => {  
+    notification.classList.remove('slide-in');  
+    notification.classList.add('slide-out');  
+  }, 3850);  
+}  
+  
+notification.addEventListener('animationend', (e) => {  
+  if (e.animationName === 'slideUp') {  
+    notification.style.display = 'none';  
+    notification.className = '';  
+    notificationMessage.textContent = '';  
+  }  
+});  
+notificationClose.addEventListener('click', () => {  
+  notification.style.display = 'none';  
+  notificationMessage.textContent = '';  
+});  
+  
+window.addEventListener("offline", () => {  
+  showNotification("You are offline, please reconnect", "error");  
+});  
+window.addEventListener("online", () => {  
+  showNotification("Back online", "success");  
+});  
+  
+  </script>
+</body>
+</html>
